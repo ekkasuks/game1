@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Razor Simulator - Quick Box Drop Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            overscroll-behavior-y: contain;
+        }
+        /* Custom Scrollbar for Program Sequence */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+        .block-btn {
+            touch-action: manipulation;
+            transition: all 0.15s ease;
+        }
+        .block-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white h-full flex flex-col overflow-hidden">
+
+    <header class="bg-slate-800/80 border-b border-slate-700 p-3 sm:p-4 shrink-0 flex flex-wrap justify-between items-center gap-2">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                Razor Simulator - VIP SCHOOL
+            </h1>
+            <p id="mission-text" class="text-xs sm:text-sm text-slate-300 flex items-center gap-1 mt-0.5">
+                </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span id="level-badge" class="bg-blue-600/30 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                Level 1
+            </span>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden p-2 sm:p-4 gap-3 sm:gap-4 max-w-7xl mx-auto w-full">
+        
+        <section class="flex-1 bg-slate-800 rounded-2xl border border-slate-700/80 p-2 sm:p-4 flex flex-col items-center justify-center relative shadow-inner overflow-hidden min-h-[300px]">
+            <div class="relative w-full h-full flex items-center justify-center">
+                <canvas id="gameCanvas" class="bg-emerald-900/40 rounded-xl shadow-lg border-2 border-emerald-500/20 max-w-full max-h-full object-contain"></canvas>
+            </div>
+        </section>
+
+        <section class="w-full lg:w-[420px] bg-slate-800 rounded-2xl border border-slate-700/80 p-3 sm:p-4 flex flex-col gap-3 h-[50vh] lg:h-full shrink-0 shadow-xl">
+            
+            <div>
+                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">คำสั่ง (Command Blocks)</h2>
+                <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-3 gap-1.5 sm:gap-2">
+                    <button onclick="addCommand('FORWARD')" class="block-btn bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-emerald-800 active:border-b-0">
+                        <span>⬆️</span> เดินหน้า
+                    </button>
+                    <button onclick="addCommand('BACKWARD')" class="block-btn bg-emerald-700 hover:bg-emerald-600 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-emerald-900 active:border-b-0">
+                        <span>⬇️</span> ถอยหลัง
+                    </button>
+                    <button onclick="addCommand('LEFT')" class="block-btn bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-blue-800 active:border-b-0">
+                        <span>↩️</span> หมุนซ้าย
+                    </button>
+                    <button onclick="addCommand('RIGHT')" class="block-btn bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-blue-800 active:border-b-0">
+                        <span>↪️</span> หมุนขวา
+                    </button>
+                    <button onclick="addCommand('PICKUP')" class="block-btn bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-amber-800 active:border-b-0">
+                        <span>📥</span> หยิบกล่อง
+                    </button>
+                    <button onclick="addCommand('DROP')" class="block-btn bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-purple-800 active:border-b-0">
+                        <span>📤</span> วางกล่อง
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col min-h-0 bg-slate-900/60 rounded-xl p-2.5 border border-slate-700/50">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ลำดับคำสั่ง (Program Sequence)</h2>
+                    <span id="step-count" class="text-xs text-slate-400">0 คำสั่ง</span>
+                </div>
+                <div id="program-list" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1.5 pr-1">
+                    <p id="empty-msg" class="text-slate-500 text-xs text-center my-auto italic">คลิกที่คำสั่งด้านบนเพื่อเริ่มเขียนโปรแกรม</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 shrink-0">
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="clearProgram()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
+                        🗑️ ล้างทั้งหมด
+                    </button>
+                    <button onclick="prevLevel()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
+                        ⏮️ ด่านก่อนหน้า
+                    </button>
+                    <button onclick="resetGame()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
+                        🔄 รีเซ็ต
+                    </button>
+                </div>
+                <button id="run-btn" onclick="runProgram()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-950/30 flex items-center justify-center gap-2 border-t border-emerald-300/40 active:scale-[0.99] transition">
+                    <span>▶️</span> เริ่มทำงาน (RUN)
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl transform transition-all scale-95 opacity-0" id="modal-card">
+            <div id="modal-icon" class="text-5xl mb-3">🎉</div>
+            <h3 id="modal-title" class="text-xl font-bold mb-2">ภารกิจสำเร็จ!</h3>
+            <p id="modal-msg" class="text-slate-300 text-sm mb-6">คุณส่งกล่องไปยังจุดที่กำหนดเรียบร้อยแล้ว</p>
+            <div class="flex gap-2 justify-center">
+                <button id="modal-retry-btn" onclick="closeModal(); resetGame();" class="bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 px-4 rounded-xl text-sm transition">
+                    ลองอีกครั้ง
+                </button>
+                <button id="modal-next-btn" onclick="closeModal(); nextLevel();" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-4 rounded-xl text-sm transition hidden">
+                    ภารกิจถัดไป ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Grid size & Directions
+        const GRID_SIZE = 9;
+        const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
+        const DIR_OFFSETS = [
+            { x: 0, y: -1 }, // UP
+            { x: 1, y: 0 },  // RIGHT
+            { x: 0, y: 1 },  // DOWN
+            { x: -1, y: 0 }  // LEFT
+        ];
+
+        // Track grid map (0: empty, 1: line path, 2: intersection)
+        const MAP_GRID = [
+            [0,0,0,0,0,0,0,0,0],
+            [0,2,1,1,2,1,1,2,0],
+            [0,1,0,0,1,0,0,1,0],
+            [0,1,0,0,1,0,0,1,0],
+            [0,2,1,1,2,1,1,2,0],
+            [0,1,0,0,1,0,0,1,0],
+            [0,1,0,0,1,0,0,1,0],
+            [0,2,1,1,2,1,1,2,0],
+            [0,0,0,0,0,0,0,0,0]
+        ];
+
+        // Levels Configuration
+        const LEVELS = [
+            {
+                id: 1,
+                mission: "🎯 นำกล่องไปส่งที่จุด DROP 1",
+                start: { x: 1, y: 7, dir: DIR.UP },
+                box: { x: 1, y: 4 },
+                target: { x: 4, y: 4, label: "DROP 1" }
+            },
+            {
+                id: 2,
+                mission: "🎯 นำกล่องไปส่งที่จุด DROP 2 (เส้นทางยาวขึ้น)",
+                start: { x: 1, y: 7, dir: DIR.UP },
+                box: { x: 4, y: 7 },
+                target: { x: 7, y: 1, label: "DROP 2" }
+            },
+            {
+                id: 3,
+                mission: "🎯 ภารกิจท้าทาย: รับกล่องที่จุดลึกแล้วไปส่งที่ DROP 3",
+                start: { x: 4, y: 4, dir: DIR.RIGHT },
+                box: { x: 7, y: 7 },
+                target: { x: 1, y: 1, label: "DROP 3" }
+            }
+        ];
+
+        let currentLevelIdx = 0;
+        let program = [];
+        let isRunning = false;
+
+        // Robot State
+        let robot = { x: 1, y: 7, dir: DIR.UP, hasBox: false };
+        let box = { x: 1, y: 4, picked: false };
+        let activeStepIndex = -1;
+
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let cellSize = 40;
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, container.clientHeight) - 10;
+            const clampedSize = Math.max(280, Math.min(size, 540));
+            canvas.width = clampedSize;
+            canvas.height = clampedSize;
+            cellSize = canvas.width / GRID_SIZE;
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Command Block Definitions
+        const COMMAND_INFO = {
+            'FORWARD': { name: 'เดินหน้า', icon: '⬆️', color: 'bg-emerald-600/30 text-emerald-300 border-emerald-500/40' },
+            'BACKWARD': { name: 'ถอยหลัง', icon: '⬇️', color: 'bg-emerald-700/30 text-emerald-300 border-emerald-600/40' },
+            'LEFT': { name: 'หมุนซ้าย', icon: '↩️', color: 'bg-blue-600/30 text-blue-300 border-blue-500/40' },
+            'RIGHT': { name: 'หมุนขวา', icon: '↪️', color: 'bg-blue-600/30 text-blue-300 border-blue-500/40' },
+            'PICKUP': { name: 'หยิบกล่อง', icon: '📥', color: 'bg-amber-600/30 text-amber-300 border-amber-500/40' },
+            'DROP': { name: 'วางกล่อง', icon: '📤', color: 'bg-purple-600/30 text-purple-300 border-purple-500/40' }
+        };
+
+        function initLevel(levelIdx) {
+            const lvl = LEVELS[levelIdx];
+            robot = { ...lvl.start, hasBox: false };
+            box = { ...lvl.box, picked: false };
+            
+            document.getElementById('level-badge').innerText = `Level ${lvl.id}`;
+            document.getElementById('mission-text').innerText = lvl.mission;
+            
+            draw();
+        }
+
+        function addCommand(cmd) {
+            if (isRunning) return;
+            program.push(cmd);
+            renderProgramList();
+        }
+
+        function removeCommand(idx) {
+            if (isRunning) return;
+            program.splice(idx, 1);
+            renderProgramList();
+        }
+
+        function clearProgram() {
+            if (isRunning) return;
+            program = [];
+            renderProgramList();
+        }
+
+        function renderProgramList() {
+            const listEl = document.getElementById('program-list');
+            const emptyMsg = document.getElementById('empty-msg');
+            document.getElementById('step-count').innerText = `${program.length} คำสั่ง`;
+
+            if (program.length === 0) {
+                listEl.innerHTML = '';
+                listEl.appendChild(emptyMsg);
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            listEl.innerHTML = '';
+            program.forEach((cmd, idx) => {
+                const info = COMMAND_INFO[cmd];
+                const isActive = idx === activeStepIndex;
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-2 rounded-xl text-xs font-medium border transition-all ${info.color} ${isActive ? 'ring-2 ring-yellow-400 scale-[1.02]' : ''}`;
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-500 w-4 font-mono">${idx + 1}.</span>
+                        <span>${info.icon}</span>
+                        <span>${info.name}</span>
+                    </div>
+                    <button onclick="removeCommand(${idx})" class="text-slate-400 hover:text-red-400 px-1 font-bold">✕</button>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function resetGame() {
+            isRunning = false;
+            activeStepIndex = -1;
+            initLevel(currentLevelIdx);
+            renderProgramList();
+            document.getElementById('run-btn').disabled = false;
+        }
+
+        function prevLevel() {
+            currentLevelIdx = (currentLevelIdx - 1 + LEVELS.length) % LEVELS.length;
+            resetGame();
+        }
+
+        function nextLevel() {
+            currentLevelIdx = (currentLevelIdx + 1) % LEVELS.length;
+            resetGame();
+        }
+
+        // Program Execution Logic
+        async function runProgram() {
+            if (isRunning || program.length === 0) return;
+            isRunning = true;
+            document.getElementById('run-btn').disabled = true;
+
+            const lvl = LEVELS[currentLevelIdx];
+
+            for (let i = 0; i < program.length; i++) {
+                if (!isRunning) break;
+                activeStepIndex = i;
+                renderProgramList();
+
+                const cmd = program[i];
+                let success = executeCommand(cmd);
+
+                draw();
+                await new Promise(res => setTimeout(res, 500));
+
+                if (!success) {
+                    showModal(false, "หุ่นยนต์ออกนอกเส้นทางที่กำหนด!");
+                    isRunning = false;
+                    break;
+                }
+            }
+
+            if (isRunning) {
+                activeStepIndex = -1;
+                renderProgramList();
+                
+                // Check Level Objective Win Condition
+                if (robot.x === lvl.target.x && robot.y === lvl.target.y && !robot.hasBox && box.x === lvl.target.x && box.y === lvl.target.y) {
+                    showModal(true, "ยินดีด้วย! คุณส่งกล่องถึงจุดหมายสำเร็จแล้ว 🎉");
+                } else {
+                    showModal(false, "ยังไม่บรรลุเป้าหมาย ตรวจสอบการหยิบ/วางกล่อง หรือจุดหมายปลายทาง");
+                }
+                isRunning = false;
+            }
+        }
+
+        function executeCommand(cmd) {
+            if (cmd === 'FORWARD') {
+                const offset = DIR_OFFSETS[robot.dir];
+                const nx = robot.x + offset.x;
+                const ny = robot.y + offset.y;
+                if (!isValidMove(nx, ny)) return false;
+                robot.x = nx;
+                robot.y = ny;
+                if (robot.hasBox) {
+                    box.x = nx;
+                    box.y = ny;
+                }
+            } else if (cmd === 'BACKWARD') {
+                const offset = DIR_OFFSETS[robot.dir];
+                const nx = robot.x - offset.x;
+                const ny = robot.y - offset.y;
+                if (!isValidMove(nx, ny)) return false;
+                robot.x = nx;
+                robot.y = ny;
+                if (robot.hasBox) {
+                    box.x = nx;
+                    box.y = ny;
+                }
+            } else if (cmd === 'LEFT') {
+                robot.dir = (robot.dir + 3) % 4;
+            } else if (cmd === 'RIGHT') {
+                robot.dir = (robot.dir + 1) % 4;
+            } else if (cmd === 'PICKUP') {
+                if (!robot.hasBox && robot.x === box.x && robot.y === box.y) {
+                    robot.hasBox = true;
+                    box.picked = true;
+                }
+            } else if (cmd === 'DROP') {
+                if (robot.hasBox) {
+                    robot.hasBox = false;
+                    box.picked = false;
+                    box.x = robot.x;
+                    box.y = robot.y;
+                }
+            }
+            return true;
+        }
+
+        function isValidMove(x, y) {
+            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return false;
+            return MAP_GRID[y][x] > 0; // Move allowed only on path (1) or intersection (2)
+        }
+
+        // Drawing Functions
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawGridAndTracks();
+            drawTarget();
+            drawBox();
+            drawRobot();
+        }
+
+        function drawGridAndTracks() {
+            // Draw field grid background
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const x = c * cellSize;
+                    const y = r * cellSize;
+                    
+                    ctx.strokeStyle = "rgba(16, 185, 129, 0.1)";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x, y, cellSize, cellSize);
+
+                    // Draw track line
+                    if (MAP_GRID[r][c] > 0) {
+                        ctx.fillStyle = "#1e293b"; // Dark track line color
+                        
+                        // Check neighbors to connect lines
+                        const isTop = r > 0 && MAP_GRID[r-1][c] > 0;
+                        const isBottom = r < GRID_SIZE-1 && MAP_GRID[r+1][c] > 0;
+                        const isLeft = c > 0 && MAP_GRID[r][c-1] > 0;
+                        const isRight = c < GRID_SIZE-1 && MAP_GRID[r][c+1] > 0;
+
+                        const cx = x + cellSize / 2;
+                        const cy = y + cellSize / 2;
+                        const trackWidth = cellSize * 0.28;
+
+                        ctx.fillStyle = "#0f172a";
+                        if (isTop) ctx.fillRect(cx - trackWidth/2, y, trackWidth, cellSize/2);
+                        if (isBottom) ctx.fillRect(cx - trackWidth/2, cy, trackWidth, cellSize/2);
+                        if (isLeft) ctx.fillRect(x, cy - trackWidth/2, cellSize/2, trackWidth);
+                        if (isRight) ctx.fillRect(cx, cy - trackWidth/2, cellSize/2, trackWidth);
+
+                        // Intersection Node Marker
+                        if (MAP_GRID[r][c] === 2) {
+                            ctx.fillStyle = "#334155";
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, trackWidth * 0.7, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawTarget() {
+            const lvl = LEVELS[currentLevelIdx];
+            const cx = lvl.target.x * cellSize + cellSize / 2;
+            const cy = lvl.target.y * cellSize + cellSize / 2;
+
+            // Target Drop Zone Circle
+            ctx.fillStyle = "rgba(168, 85, 247, 0.25)";
+            ctx.strokeStyle = "#a855f7";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, cellSize * 0.38, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = "#e9d5ff";
+            ctx.font = `bold ${Math.max(9, cellSize * 0.22)}px Kanit`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(lvl.target.label, cx, cy);
+        }
+
+        function drawBox() {
+            if (robot.hasBox) return; // Drawn on robot if carried
+
+            const bx = box.x * cellSize + cellSize * 0.2;
+            const by = box.y * cellSize + cellSize * 0.2;
+            const size = cellSize * 0.6;
+
+            draw3DBox(bx, by, size);
+        }
+
+        function draw3DBox(x, y, size) {
+            const depth = size * 0.25;
+
+            // Box Top Face
+            ctx.fillStyle = "#d97706";
+            ctx.beginPath();
+            ctx.moveTo(x, y + depth);
+            ctx.lineTo(x + size / 2, y);
+            ctx.lineTo(x + size, y + depth);
+            ctx.lineTo(x + size / 2, y + depth * 2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Left Face
+            ctx.fillStyle = "#b45309";
+            ctx.beginPath();
+            ctx.moveTo(x, y + depth);
+            ctx.lineTo(x + size / 2, y + depth * 2);
+            ctx.lineTo(x + size / 2, y + size);
+            ctx.lineTo(x, y + size - depth);
+            ctx.closePath();
+            ctx.fill();
+
+            // Right Face
+            ctx.fillStyle = "#78350f";
+            ctx.beginPath();
+            ctx.moveTo(x + size / 2, y + depth * 2);
+            ctx.lineTo(x + size, y + depth);
+            ctx.lineTo(x + size, y + size - depth);
+            ctx.lineTo(x + size / 2, y + size);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawRobot() {
+            const cx = robot.x * cellSize + cellSize / 2;
+            const cy = robot.y * cellSize + cellSize / 2;
+            const rSize = cellSize * 0.7;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate((robot.dir * 90) * Math.PI / 180);
+
+            // Robot Body (Cute Blocky)
+            ctx.fillStyle = "#3b82f6"; // Primary Blue Body
+            ctx.beginPath();
+            ctx.roundRect(-rSize/2, -rSize/2, rSize, rSize, 8);
+            ctx.fill();
+
+            // Inner Metallic Plate
+            ctx.fillStyle = "#60a5fa";
+            ctx.beginPath();
+            ctx.roundRect(-rSize*0.35, -rSize*0.35, rSize*0.7, rSize*0.7, 5);
+            ctx.fill();
+
+            // Wheels / Tracks
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(-rSize*0.55, -rSize*0.4, rSize*0.12, rSize*0.8);
+            ctx.fillRect(rSize*0.43, -rSize*0.4, rSize*0.12, rSize*0.8);
+
+            // Eyes / Front Indicator
+            ctx.fillStyle = "#06b6d4"; // Cyan glowing visor/eyes
+            ctx.beginPath();
+            ctx.arc(-rSize*0.18, -rSize*0.25, rSize*0.1, 0, Math.PI * 2);
+            ctx.arc(rSize*0.18, -rSize*0.25, rSize*0.1, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Direction Pointer/Nose
+            ctx.fillStyle = "#ef4444";
+            ctx.beginPath();
+            ctx.moveTo(0, -rSize*0.48);
+            ctx.lineTo(-rSize*0.15, -rSize*0.3);
+            ctx.lineTo(rSize*0.15, -rSize*0.3);
+            ctx.closePath();
+            ctx.fill();
+
+            // If robot is carrying box
+            if (robot.hasBox) {
+                draw3DBox(-rSize*0.3, -rSize*0.3, rSize*0.6);
+            }
+
+            ctx.restore();
+        }
+
+        // Modal Controls
+        function showModal(isSuccess, message) {
+            const modal = document.getElementById('modal');
+            const card = document.getElementById('modal-card');
+            const icon = document.getElementById('modal-icon');
+            const title = document.getElementById('modal-title');
+            const msg = document.getElementById('modal-msg');
+            const nextBtn = document.getElementById('modal-next-btn');
+
+            icon.innerText = isSuccess ? '🎉' : '❌';
+            title.innerText = isSuccess ? 'ภารกิจสำเร็จ!' : 'ภารกิจไม่สำเร็จ';
+            title.className = `text-xl font-bold mb-2 ${isSuccess ? 'text-emerald-400' : 'text-rose-400'}`;
+            msg.innerText = message;
+
+            if (isSuccess && currentLevelIdx < LEVELS.length - 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const card = document.getElementById('modal-card');
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+
+        // Prevent pull-to-refresh on mobile devices
+        document.body.addEventListener('touchmove', function(e) {
+            if (e.target.closest('#program-list')) return;
+            e.preventDefault();
+        }, { passive: false });
+
+        // Initialize App
+        window.onload = () => {
+            resizeCanvas();
+            initLevel(0);
+        };
+    </script>
+</body>
+</html>
