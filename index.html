@@ -37,31 +37,37 @@
 </head>
 <body class="bg-slate-900 text-white h-full flex flex-col overflow-hidden">
 
+    <!-- Header -->
     <header class="bg-slate-800/80 border-b border-slate-700 p-3 sm:p-4 shrink-0 flex flex-wrap justify-between items-center gap-2">
         <div>
             <h1 class="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
                 Razor Simulator - VIP SCHOOL
             </h1>
             <p id="mission-text" class="text-xs sm:text-sm text-slate-300 flex items-center gap-1 mt-0.5">
-                </p>
+                <!-- Mission loaded via JS -->
+            </p>
         </div>
         <div class="flex items-center gap-2">
             <span id="level-badge" class="bg-blue-600/30 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                Level 1
+                Level 1 / 15
             </span>
         </div>
     </header>
 
+    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col lg:flex-row overflow-hidden p-2 sm:p-4 gap-3 sm:gap-4 max-w-7xl mx-auto w-full">
         
+        <!-- Game Board Area (Left/Top) -->
         <section class="flex-1 bg-slate-800 rounded-2xl border border-slate-700/80 p-2 sm:p-4 flex flex-col items-center justify-center relative shadow-inner overflow-hidden min-h-[300px]">
             <div class="relative w-full h-full flex items-center justify-center">
                 <canvas id="gameCanvas" class="bg-emerald-900/40 rounded-xl shadow-lg border-2 border-emerald-500/20 max-w-full max-h-full object-contain"></canvas>
             </div>
         </section>
 
+        <!-- Coding Panel (Right/Bottom) -->
         <section class="w-full lg:w-[420px] bg-slate-800 rounded-2xl border border-slate-700/80 p-3 sm:p-4 flex flex-col gap-3 h-[50vh] lg:h-full shrink-0 shadow-xl">
             
+            <!-- Command Palette -->
             <div>
                 <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">คำสั่ง (Command Blocks)</h2>
                 <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-3 gap-1.5 sm:gap-2">
@@ -86,6 +92,7 @@
                 </div>
             </div>
 
+            <!-- Program Sequence Area -->
             <div class="flex-1 flex flex-col min-h-0 bg-slate-900/60 rounded-xl p-2.5 border border-slate-700/50">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ลำดับคำสั่ง (Program Sequence)</h2>
@@ -96,16 +103,17 @@
                 </div>
             </div>
 
+            <!-- Controls & Execution Buttons -->
             <div class="flex flex-col gap-2 shrink-0">
                 <div class="grid grid-cols-3 gap-2">
                     <button onclick="clearProgram()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
-                        🗑️ ล้างทั้งหมด
+                        🗑️ ล้างคำสั่ง
                     </button>
                     <button onclick="prevLevel()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
                         ⏮️ ด่านก่อนหน้า
                     </button>
                     <button onclick="resetGame()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
-                        🔄 รีเซ็ต
+                        🔄 รีเซ็ตตำแหน่ง
                     </button>
                 </div>
                 <button id="run-btn" onclick="runProgram()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-950/30 flex items-center justify-center gap-2 border-t border-emerald-300/40 active:scale-[0.99] transition">
@@ -116,6 +124,7 @@
         </section>
     </main>
 
+    <!-- Success/Failure Modal -->
     <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl transform transition-all scale-95 opacity-0" id="modal-card">
             <div id="modal-icon" class="text-5xl mb-3">🎉</div>
@@ -132,6 +141,7 @@
         </div>
     </div>
 
+    <!-- Game Logic JavaScript -->
     <script>
         // Grid size & Directions
         const GRID_SIZE = 9;
@@ -156,36 +166,30 @@
             [0,0,0,0,0,0,0,0,0]
         ];
 
-        // Levels Configuration
+        // 15 Difficulty Levels Configuration
         const LEVELS = [
-            {
-                id: 1,
-                mission: "🎯 นำกล่องไปส่งที่จุด DROP 1",
-                start: { x: 1, y: 7, dir: DIR.UP },
-                box: { x: 1, y: 4 },
-                target: { x: 4, y: 4, label: "DROP 1" }
-            },
-            {
-                id: 2,
-                mission: "🎯 นำกล่องไปส่งที่จุด DROP 2 (เส้นทางยาวขึ้น)",
-                start: { x: 1, y: 7, dir: DIR.UP },
-                box: { x: 4, y: 7 },
-                target: { x: 7, y: 1, label: "DROP 2" }
-            },
-            {
-                id: 3,
-                mission: "🎯 ภารกิจท้าทาย: รับกล่องที่จุดลึกแล้วไปส่งที่ DROP 3",
-                start: { x: 4, y: 4, dir: DIR.RIGHT },
-                box: { x: 7, y: 7 },
-                target: { x: 1, y: 1, label: "DROP 3" }
-            }
+            { id: 1,  mission: "🎯 Level 1: เดินหน้าไปหยิบกล่องแล้วนำไปส่งที่ DROP 1", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 1, y: 4 }, target: { x: 4, y: 4, label: "DROP 1" } },
+            { id: 2,  mission: "🎯 Level 2: ถอยหลังไปหยิบกล่องและเดินหน้าไปส่งที่ DROP 2", start: { x: 1, y: 4, dir: DIR.UP }, box: { x: 1, y: 7 }, target: { x: 4, y: 7, label: "DROP 2" } },
+            { id: 3,  mission: "🎯 Level 3: ฝึกการเลี้ยวขวาเพื่อนำกล่องไปส่งยัง DROP 3", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 1, y: 4 }, target: { x: 4, y: 4, label: "DROP 3" } },
+            { id: 4,  mission: "🎯 Level 4: ฝึกการเลี้ยวซ้ายไปยังมุมบนขวา DROP 4", start: { x: 4, y: 1, dir: DIR.LEFT }, box: { x: 1, y: 1 }, target: { x: 1, y: 4, label: "DROP 4" } },
+            { id: 5,  mission: "🎯 Level 5: เลี้ยวหลายต่อเพื่อข้ามฝั่งไปยัง DROP 5", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 4, y: 7 }, target: { x: 4, y: 1, label: "DROP 5" } },
+            { id: 6,  mission: "🎯 Level 6: เดินทางอ้อมเส้นทางล่างไปส่งที่ DROP 6", start: { x: 1, y: 1, dir: DIR.DOWN }, box: { x: 1, y: 4 }, target: { x: 7, y: 7, label: "DROP 6" } },
+            { id: 7,  mission: "🎯 Level 7: ภารกิจซิกแซกแนวตั้ง นำส่งจุด DROP 7", start: { x: 7, y: 7, dir: DIR.UP }, box: { x: 7, y: 4 }, target: { x: 1, y: 1, label: "DROP 7" } },
+            { id: 8,  mission: "🎯 Level 8: ท้าทายถอยหลังเลี้ยวมุมแคบไปยัง DROP 8", start: { x: 4, y: 4, dir: DIR.RIGHT }, box: { x: 1, y: 4 }, target: { x: 1, y: 7, label: "DROP 8" } },
+            { id: 9,  mission: "🎯 Level 9: รับกล่องตรงกลางและเดินทางไกลไป DROP 9", start: { x: 1, y: 1, dir: DIR.RIGHT }, box: { x: 4, y: 4 }, target: { x: 7, y: 7, label: "DROP 9" } },
+            { id: 10, mission: "🎯 Level 10: ข้ามแมปจากซ้ายล่างไปขวาบน DROP 10", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 4, y: 7 }, target: { x: 7, y: 1, label: "DROP 10" } },
+            { id: 11, mission: "🎯 Level 11: ภารกิจวนรอบนอก นำส่งที่จุด DROP 11", start: { x: 4, y: 1, dir: DIR.RIGHT }, box: { x: 7, y: 1 }, target: { x: 1, y: 7, label: "DROP 11" } },
+            { id: 12, mission: "🎯 Level 12: การสลับทิศทางซับซ้อน มุ่งสู่ DROP 12", start: { x: 7, y: 1, dir: DIR.DOWN }, box: { x: 7, y: 4 }, target: { x: 1, y: 4, label: "DROP 12" } },
+            { id: 13, mission: "🎯 Level 13: ภารกิจขนส่งระยะไกลมุมสู่มุม DROP 13", start: { x: 7, y: 7, dir: DIR.LEFT }, box: { x: 4, y: 7 }, target: { x: 1, y: 1, label: "DROP 13" } },
+            { id: 14, mission: "🎯 Level 14: บริหารคำสั่งแบบประหยัดบล็อกสู่ DROP 14", start: { x: 1, y: 4, dir: DIR.DOWN }, box: { x: 4, y: 4 }, target: { x: 7, y: 1, label: "DROP 14" } },
+            { id: 15, mission: "🎯 Level 15: ภารกิจระดับปรมาจารย์! นำส่งจุด DROP 15", start: { x: 4, y: 7, dir: DIR.UP }, box: { x: 7, y: 7 }, target: { x: 1, y: 1, label: "DROP 15" } }
         ];
 
         let currentLevelIdx = 0;
         let program = [];
         let isRunning = false;
 
-        // Robot State
+        // Robot & Box State
         let robot = { x: 1, y: 7, dir: DIR.UP, hasBox: false };
         let box = { x: 1, y: 4, picked: false };
         let activeStepIndex = -1;
@@ -222,7 +226,10 @@
             robot = { ...lvl.start, hasBox: false };
             box = { ...lvl.box, picked: false };
             
-            document.getElementById('level-badge').innerText = `Level ${lvl.id}`;
+            // Clear programming sequence upon changing level
+            clearProgram();
+
+            document.getElementById('level-badge').innerText = `Level ${lvl.id} / ${LEVELS.length}`;
             document.getElementById('mission-text').innerText = lvl.mission;
             
             draw();
@@ -279,19 +286,22 @@
         function resetGame() {
             isRunning = false;
             activeStepIndex = -1;
-            initLevel(currentLevelIdx);
+            const lvl = LEVELS[currentLevelIdx];
+            robot = { ...lvl.start, hasBox: false };
+            box = { ...lvl.box, picked: false };
+            draw();
             renderProgramList();
             document.getElementById('run-btn').disabled = false;
         }
 
         function prevLevel() {
             currentLevelIdx = (currentLevelIdx - 1 + LEVELS.length) % LEVELS.length;
-            resetGame();
+            initLevel(currentLevelIdx);
         }
 
         function nextLevel() {
             currentLevelIdx = (currentLevelIdx + 1) % LEVELS.length;
-            resetGame();
+            initLevel(currentLevelIdx);
         }
 
         // Program Execution Logic
@@ -311,10 +321,10 @@
                 let success = executeCommand(cmd);
 
                 draw();
-                await new Promise(res => setTimeout(res, 500));
+                await new Promise(res => setTimeout(res, 400));
 
                 if (!success) {
-                    showModal(false, "หุ่นยนต์ออกนอกเส้นทางที่กำหนด!");
+                    showModal(false, "หุ่นยนต์ตกจากเส้นทางที่กำหนด!");
                     isRunning = false;
                     break;
                 }
@@ -324,7 +334,7 @@
                 activeStepIndex = -1;
                 renderProgramList();
                 
-                // Check Level Objective Win Condition
+                // Check Win Condition
                 if (robot.x === lvl.target.x && robot.y === lvl.target.y && !robot.hasBox && box.x === lvl.target.x && box.y === lvl.target.y) {
                     showModal(true, "ยินดีด้วย! คุณส่งกล่องถึงจุดหมายสำเร็จแล้ว 🎉");
                 } else {
@@ -379,7 +389,7 @@
 
         function isValidMove(x, y) {
             if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return false;
-            return MAP_GRID[y][x] > 0; // Move allowed only on path (1) or intersection (2)
+            return MAP_GRID[y][x] > 0;
         }
 
         // Drawing Functions
@@ -393,7 +403,6 @@
         }
 
         function drawGridAndTracks() {
-            // Draw field grid background
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
                     const x = c * cellSize;
@@ -403,11 +412,7 @@
                     ctx.lineWidth = 1;
                     ctx.strokeRect(x, y, cellSize, cellSize);
 
-                    // Draw track line
                     if (MAP_GRID[r][c] > 0) {
-                        ctx.fillStyle = "#1e293b"; // Dark track line color
-                        
-                        // Check neighbors to connect lines
                         const isTop = r > 0 && MAP_GRID[r-1][c] > 0;
                         const isBottom = r < GRID_SIZE-1 && MAP_GRID[r+1][c] > 0;
                         const isLeft = c > 0 && MAP_GRID[r][c-1] > 0;
@@ -423,7 +428,6 @@
                         if (isLeft) ctx.fillRect(x, cy - trackWidth/2, cellSize/2, trackWidth);
                         if (isRight) ctx.fillRect(cx, cy - trackWidth/2, cellSize/2, trackWidth);
 
-                        // Intersection Node Marker
                         if (MAP_GRID[r][c] === 2) {
                             ctx.fillStyle = "#334155";
                             ctx.beginPath();
@@ -440,7 +444,6 @@
             const cx = lvl.target.x * cellSize + cellSize / 2;
             const cy = lvl.target.y * cellSize + cellSize / 2;
 
-            // Target Drop Zone Circle
             ctx.fillStyle = "rgba(168, 85, 247, 0.25)";
             ctx.strokeStyle = "#a855f7";
             ctx.lineWidth = 2;
@@ -449,16 +452,15 @@
             ctx.fill();
             ctx.stroke();
 
-            // Label
             ctx.fillStyle = "#e9d5ff";
-            ctx.font = `bold ${Math.max(9, cellSize * 0.22)}px Kanit`;
+            ctx.font = `bold ${Math.max(9, cellSize * 0.2)}px Kanit`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(lvl.target.label, cx, cy);
         }
 
         function drawBox() {
-            if (robot.hasBox) return; // Drawn on robot if carried
+            if (robot.hasBox) return;
 
             const bx = box.x * cellSize + cellSize * 0.2;
             const by = box.y * cellSize + cellSize * 0.2;
@@ -470,7 +472,6 @@
         function draw3DBox(x, y, size) {
             const depth = size * 0.25;
 
-            // Box Top Face
             ctx.fillStyle = "#d97706";
             ctx.beginPath();
             ctx.moveTo(x, y + depth);
@@ -480,7 +481,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Left Face
             ctx.fillStyle = "#b45309";
             ctx.beginPath();
             ctx.moveTo(x, y + depth);
@@ -490,7 +490,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Right Face
             ctx.fillStyle = "#78350f";
             ctx.beginPath();
             ctx.moveTo(x + size / 2, y + depth * 2);
@@ -510,31 +509,26 @@
             ctx.translate(cx, cy);
             ctx.rotate((robot.dir * 90) * Math.PI / 180);
 
-            // Robot Body (Cute Blocky)
-            ctx.fillStyle = "#3b82f6"; // Primary Blue Body
+            ctx.fillStyle = "#3b82f6";
             ctx.beginPath();
             ctx.roundRect(-rSize/2, -rSize/2, rSize, rSize, 8);
             ctx.fill();
 
-            // Inner Metallic Plate
             ctx.fillStyle = "#60a5fa";
             ctx.beginPath();
             ctx.roundRect(-rSize*0.35, -rSize*0.35, rSize*0.7, rSize*0.7, 5);
             ctx.fill();
 
-            // Wheels / Tracks
             ctx.fillStyle = "#0f172a";
             ctx.fillRect(-rSize*0.55, -rSize*0.4, rSize*0.12, rSize*0.8);
             ctx.fillRect(rSize*0.43, -rSize*0.4, rSize*0.12, rSize*0.8);
 
-            // Eyes / Front Indicator
-            ctx.fillStyle = "#06b6d4"; // Cyan glowing visor/eyes
+            ctx.fillStyle = "#06b6d4";
             ctx.beginPath();
             ctx.arc(-rSize*0.18, -rSize*0.25, rSize*0.1, 0, Math.PI * 2);
             ctx.arc(rSize*0.18, -rSize*0.25, rSize*0.1, 0, Math.PI * 2);
             ctx.fill();
 
-            // Direction Pointer/Nose
             ctx.fillStyle = "#ef4444";
             ctx.beginPath();
             ctx.moveTo(0, -rSize*0.48);
@@ -543,7 +537,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // If robot is carrying box
             if (robot.hasBox) {
                 draw3DBox(-rSize*0.3, -rSize*0.3, rSize*0.6);
             }
@@ -588,13 +581,13 @@
             }, 150);
         }
 
-        // Prevent pull-to-refresh on mobile devices
+        // Prevent pull-to-refresh on mobile
         document.body.addEventListener('touchmove', function(e) {
             if (e.target.closest('#program-list')) return;
             e.preventDefault();
         }, { passive: false });
 
-        // Initialize App
+        // Initialize Game
         window.onload = () => {
             resizeCanvas();
             initLevel(0);
