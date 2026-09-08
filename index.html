@@ -1,597 +1,1182 @@
+
+การสนทนากับ Gemini
+สร้าง game วางแผน ลาก block คำสั่ง ให้นักเรียน วางแผนแต่ละแผนที่ จำนวน 15 แผนที่ เป็นไฟล์เดียว html
+
+เกมวางแผน ลาก-วาง Block คำสั่งสำหรับนักเรียน (Coding Adventure) พร้อมแผนที่และระดับความยากต่างกันทั้งหมด 15 แผนที่ (Levels) ถูกสร้างเป็นไฟล์ HTML เดี่ยวแบบสมบูรณ์เรียบร้อยแล้วครับ
+
+ไอคอน HTML
+coding_adventure_game
+ HTML 
+🎮 ฟีเจอร์และรายละเอียดในตัวเกม:
+ระบบการเล่น (Gameplay):
+
+ลากและวาง (Drag & Drop): นักเรียนสามารถลากบล็อกคำสั่งจากกล่องคำสั่งมาวางในพื้นที่โปรแกรม (Program Workspace) ได้อย่างง่ายดาย
+
+ระบบคำสั่งพื้นฐาน:
+
+⬆️ เดินหน้า (Move)
+
+↩️ หมุนซ้าย (Turn Left)
+
+↪️ หมุนขวา (Turn Right)
+
+💎 เก็บของ / ทำงาน (Collect Item)
+
+ปุ่มทดสอบโปรแกรม: มีปุ่ม ▶️ เริ่มทำงาน เพื่อสั่งให้หุ่นยนต์ 🤖 เดินตามคำสั่งที่วางไว้แบบทีละก้าว (Step-by-step Execution Highlight) และปุ่ม 🔄 รีเซ็ต เมื่อต้องการเริ่มใหม่
+
+ระดับความยาก 15 แผนที่ (15 Levels Progression):
+
+ด่าน 1-3 (การเคลื่อนที่เบื้องต้น): ฝึกการเดินหน้า เลี้ยวซ้าย/ขวา และการเดินซิกแซก
+
+ด่าน 4-7 (ภารกิจเก็บไอเทมและหลบหลีก): เพิ่มคำสั่งเก็บเพชร 💎 และการเดินหลบกำแพง ⬛
+
+ด่าน 8-10 (เขาวงกตและกับดัก): เพิ่มความท้าทายด้วยกับดักหนาม ⚠️ และแผนที่ขนาดใหญ่ขึ้น (6x6)
+
+ด่าน 11-15 (เงื่อนไขและเส้นทางซับซ้อน): เก็บเพชรหลายเม็ดในเขาวงกตขนาดใหญ่ (7x7) ก่อนเดินทางไปจุดหมาย 🏁
+
+การออกแบบและ UI (User Experience):
+
+Single File HTML: รวม CSS และ JavaScript ไว้ในไฟล์เดียว สามารถเปิดใช้งานบนเว็บเบราว์เซอร์ (Chrome, Edge, Firefox, Safari) ได้ทันทีโดยไม่ต้องเชื่อมต่ออินเทอร์เน็ต
+
+ดีไซน์ทันสมัย: Responsive รองรับหน้าจอคอมพิวเตอร์และแท็บเล็ต โทนสีเข้มสบายตาพร้อม Modal แจ้งเตือนเมื่อผ่านด่านหรือภารกิจล้มเหลว
+
+
+
+
+ระบบไม่ได้ใช้แชท สำนักงานเขตพื้นที่การศึกษาประถมศึกษานครปฐม เขต 1 ของคุณในการปรับปรุงโมเดลของเรา Gemini เป็น AI และอาจทำผิดพลาดได้ ความเป็นส่วนตัวของคุณกับ Geminiเปิดในหน้าต่างใหม่
+
+กำลังวิเคราะห์
 <!DOCTYPE html>
-<html lang="th" class="h-full select-none">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Razor Simulator - Quick Box Drop Challenge</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมผจญภัยเขียนโค้ดวางแผน - Coding Adventure (15 Levels)</title>
     <style>
+        :root {
+            --primary: #4A90E2;
+            --primary-dark: #357ABD;
+            --secondary: #50E3C2;
+            --accent-orange: #FF9F43;
+            --accent-green: #10AC84;
+            --accent-red: #EE5253;
+            --bg-dark: #1E272C;
+            --bg-card: #2C3A47;
+            --bg-light: #F8F9FA;
+            --text-light: #F1F2F6;
+            --text-dark: #2C3A47;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
         body {
-            font-family: 'Kanit', sans-serif;
-            overscroll-behavior-y: contain;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        /* Custom Scrollbar for Program Sequence */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
+
+        /* Header Bar */
+        header {
+            background-color: var(--bg-card);
+            padding: 12px 24px;
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 10;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-title h1 {
+            font-size: 1.4rem;
+            color: #FFF;
+            font-weight: 700;
+        }
+
+        .level-selector-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select.level-select {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            background-color: var(--bg-dark);
+            color: #FFF;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Main Game Layout */
+        .game-container {
+            display: flex;
+            flex: 1;
+            padding: 16px;
+            gap: 16px;
+            height: calc(100vh - 65px);
+        }
+
+        /* Panel Common */
+        .panel {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: rgba(0,0,0,0.2);
+            padding: 12px 16px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Left Panel: Toolbox & Workspace */
+        .coding-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .workspace-container {
+            display: flex;
+            flex: 1;
+            gap: 12px;
+            min-height: 0; /* Important for inner scrolling */
+        }
+
+        /* Blocks Toolbox */
+        .toolbox {
+            width: 180px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .toolbox-title {
+            font-size: 0.85rem;
+            color: #A0AAB2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        /* Block Styles */
+        .code-block {
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+            border-left: 5px solid rgba(0,0,0,0.3);
+        }
+
+        .code-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        .code-block:active {
+            cursor: grabbing;
+        }
+
+        .block-move { background-color: var(--primary); }
+        .block-turn-left { background-color: var(--accent-orange); }
+        .block-turn-right { background-color: var(--accent-orange); }
+        .block-action { background-color: var(--accent-green); }
+        .block-repeat { background-color: #9B59B6; }
+
+        /* Program Drop Area */
+        .program-workspace {
+            flex: 1;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            border: 2px dashed #4A5568;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-content: start;
+        }
+
+        .program-workspace.drag-over {
+            border-color: var(--secondary);
+            background: rgba(80, 227, 194, 0.05);
+        }
+
+        .workspace-block {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .workspace-block .remove-btn {
+            background: rgba(0,0,0,0.2);
+            border: none;
+            color: #FF6B6B;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .workspace-block .remove-btn:hover {
+            background: #EE5253;
+            color: white;
+        }
+
+        .workspace-block.executing {
+            box-shadow: 0 0 12px #FFD700;
+            border: 2px solid #FFD700;
+        }
+
+        /* Controls Area */
+        .controls {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(0,0,0,0.15);
             border-radius: 8px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #3b82f6;
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
             border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.1s;
+            color: white;
+            flex: 1;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #60a5fa;
+
+        .btn:active { transform: scale(0.98); }
+        .btn-run { background-color: var(--accent-green); }
+        .btn-run:hover { background-color: #0E9A75; }
+        .btn-reset { background-color: var(--accent-red); }
+        .btn-reset:hover { background-color: #D63031; }
+
+        /* Right Panel: Map & Status */
+        .map-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
         }
-        .block-btn {
-            touch-action: manipulation;
-            transition: all 0.15s ease;
+
+        .level-info {
+            width: 100%;
+            background: rgba(0,0,0,0.15);
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
         }
-        .block-btn:active {
-            transform: scale(0.95);
+
+        .level-title {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin-bottom: 4px;
+        }
+
+        .level-desc {
+            font-size: 0.9rem;
+            color: #CBD5E0;
+        }
+
+        /* Grid Map */
+        .grid-container {
+            display: grid;
+            gap: 4px;
+            background-color: #1A202C;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            margin: auto 0;
+        }
+
+        .cell {
+            width: 64px;
+            height: 64px;
+            background-color: #2D3748;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .cell.path { background-color: #4A5568; }
+        .cell.wall { background-color: #1A202C; opacity: 0.6; }
+        .cell.start { background-color: #2B6CB0; }
+        .cell.goal { background-color: #2F855A; }
+        .cell.hazard { background-color: #9B2C2C; }
+
+        /* Player Robot */
+        .player {
+            transition: transform 0.3s ease-in-out, top 0.3s, left 0.3s;
+            z-index: 5;
+            line-height: 1;
+        }
+
+        /* Modal Popup */
+        .modal-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 2px solid var(--secondary);
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            color: #FFF;
+        }
+
+        .modal-desc {
+            font-size: 1rem;
+            color: #A0AAB2;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            background: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .modal-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Empty State */
+        .empty-hint {
+            color: #718096;
+            text-align: center;
+            margin: auto;
+            font-style: italic;
+            pointer-events: none;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 900px) {
+            .game-container { flex-direction: column; overflow-y: auto; }
+            .cell { width: 48px; height: 48px; font-size: 1.4rem; }
+            body { overflow: auto; }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white h-full flex flex-col overflow-hidden">
+<body>
 
-    <!-- Header -->
-    <header class="bg-slate-800/80 border-b border-slate-700 p-3 sm:p-4 shrink-0 flex flex-wrap justify-between items-center gap-2">
-        <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-                Razor Simulator - VIP SCHOOL
-            </h1>
-            <p id="mission-text" class="text-xs sm:text-sm text-slate-300 flex items-center gap-1 mt-0.5">
-                <!-- Mission loaded via JS -->
-            </p>
+    <header>
+        <div class="logo-title">
+            <span>🤖</span>
+            <h1>Coding Adventure: วางแผนโค้ดดิ้ง 15 ด่าน</h1>
         </div>
-        <div class="flex items-center gap-2">
-            <span id="level-badge" class="bg-blue-600/30 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                Level 1 / 15
-            </span>
+        <div class="level-selector-wrapper">
+            <label for="levelSelect">เลือกด่าน: </label>
+            <select id="levelSelect" class="level-select" onchange="changeLevel(this.value)">
+                <!-- JS Populated -->
+            </select>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden p-2 sm:p-4 gap-3 sm:gap-4 max-w-7xl mx-auto w-full">
-        
-        <!-- Game Board Area (Left/Top) -->
-        <section class="flex-1 bg-slate-800 rounded-2xl border border-slate-700/80 p-2 sm:p-4 flex flex-col items-center justify-center relative shadow-inner overflow-hidden min-h-[300px]">
-            <div class="relative w-full h-full flex items-center justify-center">
-                <canvas id="gameCanvas" class="bg-emerald-900/40 rounded-xl shadow-lg border-2 border-emerald-500/20 max-w-full max-h-full object-contain"></canvas>
+    <div class="game-container">
+        <!-- Left Side: Programming Workspace -->
+        <div class="panel coding-panel">
+            <div class="panel-header">
+                <span>🧩 บล็อกคำสั่ง (Drag & Drop)</span>
+                <span style="font-size:0.85rem; color:#A0AAB2;">ลากมาวางในช่องโปรแกรม</span>
             </div>
-        </section>
-
-        <!-- Coding Panel (Right/Bottom) -->
-        <section class="w-full lg:w-[420px] bg-slate-800 rounded-2xl border border-slate-700/80 p-3 sm:p-4 flex flex-col gap-3 h-[50vh] lg:h-full shrink-0 shadow-xl">
             
-            <!-- Command Palette -->
-            <div>
-                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">คำสั่ง (Command Blocks)</h2>
-                <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-3 gap-1.5 sm:gap-2">
-                    <button onclick="addCommand('FORWARD')" class="block-btn bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-emerald-800 active:border-b-0">
+            <div class="workspace-container">
+                <!-- Toolbox -->
+                <div class="toolbox" id="toolbox">
+                    <div class="toolbox-title">คำสั่งที่มี</div>
+                    
+                    <div class="code-block block-move" draggable="true" data-type="move">
                         <span>⬆️</span> เดินหน้า
-                    </button>
-                    <button onclick="addCommand('BACKWARD')" class="block-btn bg-emerald-700 hover:bg-emerald-600 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-emerald-900 active:border-b-0">
-                        <span>⬇️</span> ถอยหลัง
-                    </button>
-                    <button onclick="addCommand('LEFT')" class="block-btn bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-blue-800 active:border-b-0">
+                    </div>
+                    <div class="code-block block-turn-left" draggable="true" data-type="turnLeft">
                         <span>↩️</span> หมุนซ้าย
-                    </button>
-                    <button onclick="addCommand('RIGHT')" class="block-btn bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-blue-800 active:border-b-0">
+                    </div>
+                    <div class="code-block block-turn-right" draggable="true" data-type="turnRight">
                         <span>↪️</span> หมุนขวา
-                    </button>
-                    <button onclick="addCommand('PICKUP')" class="block-btn bg-amber-600 hover:bg-amber-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-amber-800 active:border-b-0">
-                        <span>📥</span> หยิบกล่อง
-                    </button>
-                    <button onclick="addCommand('DROP')" class="block-btn bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1 shadow-md border-b-2 border-purple-800 active:border-b-0">
-                        <span>📤</span> วางกล่อง
-                    </button>
+                    </div>
+                    <div class="code-block block-action" draggable="true" data-type="collect">
+                        <span>💎</span> เก็บของ / ทำงาน
+                    </div>
+                </div>
+
+                <!-- Program Area -->
+                <div class="program-workspace" id="programWorkspace">
+                    <div class="empty-hint" id="emptyHint">ลากคำสั่งมาวางที่นี่เพื่อสร้างโปรแกรม...</div>
                 </div>
             </div>
 
-            <!-- Program Sequence Area -->
-            <div class="flex-1 flex flex-col min-h-0 bg-slate-900/60 rounded-xl p-2.5 border border-slate-700/50">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ลำดับคำสั่ง (Program Sequence)</h2>
-                    <span id="step-count" class="text-xs text-slate-400">0 คำสั่ง</span>
-                </div>
-                <div id="program-list" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1.5 pr-1">
-                    <p id="empty-msg" class="text-slate-500 text-xs text-center my-auto italic">คลิกที่คำสั่งด้านบนเพื่อเริ่มเขียนโปรแกรม</p>
-                </div>
-            </div>
-
-            <!-- Controls & Execution Buttons -->
-            <div class="flex flex-col gap-2 shrink-0">
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="clearProgram()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
-                        🗑️ ล้างคำสั่ง
-                    </button>
-                    <button onclick="prevLevel()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
-                        ⏮️ ด่านก่อนหน้า
-                    </button>
-                    <button onclick="resetGame()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 px-2 rounded-lg text-xs font-medium transition">
-                        🔄 รีเซ็ตตำแหน่ง
-                    </button>
-                </div>
-                <button id="run-btn" onclick="runProgram()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-950/30 flex items-center justify-center gap-2 border-t border-emerald-300/40 active:scale-[0.99] transition">
-                    <span>▶️</span> เริ่มทำงาน (RUN)
+            <!-- Execution Controls -->
+            <div class="controls">
+                <button class="btn btn-run" id="runBtn" onclick="runCode()">
+                    <span>▶️</span> เริ่มทำงาน
+                </button>
+                <button class="btn btn-reset" onclick="resetLevel()">
+                    <span>🔄</span> รีเซ็ต
                 </button>
             </div>
+        </div>
 
-        </section>
-    </main>
+        <!-- Right Side: Map Display -->
+        <div class="panel map-panel" style="padding: 16px;">
+            <div class="level-info">
+                <div class="level-title" id="levelTitle">ด่านที่ 1: ...</div>
+                <div class="level-desc" id="levelDesc">...</div>
+            </div>
 
-    <!-- Success/Failure Modal -->
-    <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl transform transition-all scale-95 opacity-0" id="modal-card">
-            <div id="modal-icon" class="text-5xl mb-3">🎉</div>
-            <h3 id="modal-title" class="text-xl font-bold mb-2">ภารกิจสำเร็จ!</h3>
-            <p id="modal-msg" class="text-slate-300 text-sm mb-6">คุณส่งกล่องไปยังจุดที่กำหนดเรียบร้อยแล้ว</p>
-            <div class="flex gap-2 justify-center">
-                <button id="modal-retry-btn" onclick="closeModal(); resetGame();" class="bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 px-4 rounded-xl text-sm transition">
-                    ลองอีกครั้ง
-                </button>
-                <button id="modal-next-btn" onclick="closeModal(); nextLevel();" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-4 rounded-xl text-sm transition hidden">
-                    ภารกิจถัดไป ➔
-                </button>
+            <div id="gridMap" class="grid-container">
+                <!-- Grid Cells Generated by JS -->
+            </div>
+
+            <div style="font-size: 0.85rem; color: #A0AAB2; text-align: center; margin-top: 10px;">
+                🚩 เป้าหมาย: พาหุ่นยนต์ 🤖 ไปยังจุดหมาย 🏁 (และเก็บไอเทมถ้ามี)
             </div>
         </div>
     </div>
 
-    <!-- Game Logic JavaScript -->
+    <!-- Modal Notification -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">🎉</div>
+            <div class="modal-title" id="modalTitle">ภารกิจสำเร็จ!</div>
+            <div class="modal-desc" id="modalDesc">คุณวางแผนโค้ดดิ้งได้ถูกต้องแม่นยำมาก</div>
+            <button class="modal-btn" id="modalBtn" onclick="closeModal()">ไปด่านถัดไป</button>
+        </div>
+    </div>
+
     <script>
-        // Grid size & Directions
-        const GRID_SIZE = 9;
-        const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
-        const DIR_OFFSETS = [
-            { x: 0, y: -1 }, // UP
-            { x: 1, y: 0 },  // RIGHT
-            { x: 0, y: 1 },  // DOWN
-            { x: -1, y: 0 }  // LEFT
-        ];
-
-        // Track grid map (0: empty, 1: line path, 2: intersection)
-        const MAP_GRID = [
-            [0,0,0,0,0,0,0,0,0],
-            [0,2,1,1,2,1,1,2,0],
-            [0,1,0,0,1,0,0,1,0],
-            [0,1,0,0,1,0,0,1,0],
-            [0,2,1,1,2,1,1,2,0],
-            [0,1,0,0,1,0,0,1,0],
-            [0,1,0,0,1,0,0,1,0],
-            [0,2,1,1,2,1,1,2,0],
-            [0,0,0,0,0,0,0,0,0]
-        ];
-
-        // 15 Difficulty Levels Configuration
+        // -------------------------------------------------------------
+        // Level Data (15 Levels with increasing complexity)
+        // 0: Empty, 1: Path/Walkable, 2: Wall, 3: Goal, 4: Item/Gem, 5: Hazard/Trap
+        // -------------------------------------------------------------
         const LEVELS = [
-            { id: 1,  mission: "🎯 Level 1: เดินหน้าไปหยิบกล่องแล้วนำไปส่งที่ DROP 1", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 1, y: 4 }, target: { x: 4, y: 4, label: "DROP 1" } },
-            { id: 2,  mission: "🎯 Level 2: ถอยหลังไปหยิบกล่องและเดินหน้าไปส่งที่ DROP 2", start: { x: 1, y: 4, dir: DIR.UP }, box: { x: 1, y: 7 }, target: { x: 4, y: 7, label: "DROP 2" } },
-            { id: 3,  mission: "🎯 Level 3: ฝึกการเลี้ยวขวาเพื่อนำกล่องไปส่งยัง DROP 3", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 1, y: 4 }, target: { x: 4, y: 4, label: "DROP 3" } },
-            { id: 4,  mission: "🎯 Level 4: ฝึกการเลี้ยวซ้ายไปยังมุมบนขวา DROP 4", start: { x: 4, y: 1, dir: DIR.LEFT }, box: { x: 1, y: 1 }, target: { x: 1, y: 4, label: "DROP 4" } },
-            { id: 5,  mission: "🎯 Level 5: เลี้ยวหลายต่อเพื่อข้ามฝั่งไปยัง DROP 5", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 4, y: 7 }, target: { x: 4, y: 1, label: "DROP 5" } },
-            { id: 6,  mission: "🎯 Level 6: เดินทางอ้อมเส้นทางล่างไปส่งที่ DROP 6", start: { x: 1, y: 1, dir: DIR.DOWN }, box: { x: 1, y: 4 }, target: { x: 7, y: 7, label: "DROP 6" } },
-            { id: 7,  mission: "🎯 Level 7: ภารกิจซิกแซกแนวตั้ง นำส่งจุด DROP 7", start: { x: 7, y: 7, dir: DIR.UP }, box: { x: 7, y: 4 }, target: { x: 1, y: 1, label: "DROP 7" } },
-            { id: 8,  mission: "🎯 Level 8: ท้าทายถอยหลังเลี้ยวมุมแคบไปยัง DROP 8", start: { x: 4, y: 4, dir: DIR.RIGHT }, box: { x: 1, y: 4 }, target: { x: 1, y: 7, label: "DROP 8" } },
-            { id: 9,  mission: "🎯 Level 9: รับกล่องตรงกลางและเดินทางไกลไป DROP 9", start: { x: 1, y: 1, dir: DIR.RIGHT }, box: { x: 4, y: 4 }, target: { x: 7, y: 7, label: "DROP 9" } },
-            { id: 10, mission: "🎯 Level 10: ข้ามแมปจากซ้ายล่างไปขวาบน DROP 10", start: { x: 1, y: 7, dir: DIR.UP }, box: { x: 4, y: 7 }, target: { x: 7, y: 1, label: "DROP 10" } },
-            { id: 11, mission: "🎯 Level 11: ภารกิจวนรอบนอก นำส่งที่จุด DROP 11", start: { x: 4, y: 1, dir: DIR.RIGHT }, box: { x: 7, y: 1 }, target: { x: 1, y: 7, label: "DROP 11" } },
-            { id: 12, mission: "🎯 Level 12: การสลับทิศทางซับซ้อน มุ่งสู่ DROP 12", start: { x: 7, y: 1, dir: DIR.DOWN }, box: { x: 7, y: 4 }, target: { x: 1, y: 4, label: "DROP 12" } },
-            { id: 13, mission: "🎯 Level 13: ภารกิจขนส่งระยะไกลมุมสู่มุม DROP 13", start: { x: 7, y: 7, dir: DIR.LEFT }, box: { x: 4, y: 7 }, target: { x: 1, y: 1, label: "DROP 13" } },
-            { id: 14, mission: "🎯 Level 14: บริหารคำสั่งแบบประหยัดบล็อกสู่ DROP 14", start: { x: 1, y: 4, dir: DIR.DOWN }, box: { x: 4, y: 4 }, target: { x: 7, y: 1, label: "DROP 14" } },
-            { id: 15, mission: "🎯 Level 15: ภารกิจระดับปรมาจารย์! นำส่งจุด DROP 15", start: { x: 4, y: 7, dir: DIR.UP }, box: { x: 7, y: 7 }, target: { x: 1, y: 1, label: "DROP 15" } }
+            {
+                id: 1,
+                name: "ด่านที่ 1: ก้าวแรกสู่การเขียนโค้ด",
+                desc: "พาหุ่นยนต์เดินหน้า 3 ก้าว ไปยังจุดหมาย 🏁",
+                gridSize: [5, 5],
+                start: { x: 0, y: 2, dir: 1 }, // dir: 0=Up, 1=Right, 2=Down, 3=Left
+                map: [
+                    [0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [1,1,1,3,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0]
+                ]
+            },
+            {
+                id: 2,
+                name: "ด่านที่ 2: การเลี้ยวขวา",
+                desc: "เดินหน้า แล้วเลี้ยวขวาเพื่อไปยังเป้าหมาย 🏁",
+                gridSize: [5, 5],
+                start: { x: 1, y: 1, dir: 1 },
+                map: [
+                    [0,0,0,0,0],
+                    [0,1,1,0,0],
+                    [0,0,1,0,0],
+                    [0,0,3,0,0],
+                    [0,0,0,0,0]
+                ]
+            },
+            {
+                id: 3,
+                name: "ด่านที่ 3: เส้นทางซิกแซก",
+                desc: "ฝึกวางแผนเลี้ยวซ้ายและเลี้ยวขวาตามทาง",
+                gridSize: [5, 5],
+                start: { x: 0, y: 0, dir: 1 },
+                map: [
+                    [1,1,0,0,0],
+                    [0,1,1,0,0],
+                    [0,0,1,1,0],
+                    [0,0,0,3,0],
+                    [0,0,0,0,0]
+                ]
+            },
+            {
+                id: 4,
+                name: "ด่านที่ 4: นักสะสมเพชร",
+                desc: "เดินไปเก็บเพชร 💎 โดยใช้คำสั่ง 'เก็บของ' แล้วเดินไปจุดหมาย",
+                gridSize: [5, 5],
+                start: { x: 0, y: 2, dir: 1 },
+                items: [{x: 2, y: 2, collected: false}],
+                map: [
+                    [0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [1,1,4,1,3],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0]
+                ]
+            },
+            {
+                id: 5,
+                name: "ด่านที่ 5: หลบหลีกสิ่งกีดขวาง",
+                desc: "หลบสิ่งกีดขวาง (⬛) เพื่อเดินทางไปให้ถึงเป้าหมาย",
+                gridSize: [5, 5],
+                start: { x: 0, y: 4, dir: 0 },
+                map: [
+                    [0,0,0,3,0],
+                    [0,0,2,1,0],
+                    [0,2,1,1,0],
+                    [0,1,1,2,0],
+                    [1,1,0,0,0]
+                ]
+            },
+            {
+                id: 6,
+                name: "ด่านที่ 6: เพชรสองเม็ด",
+                desc: "วางแผนเก็บเพชร 💎 ให้ครบทั้ง 2 เม็ดก่อนเข้าจุดหมาย",
+                gridSize: [5, 5],
+                start: { x: 2, y: 4, dir: 0 },
+                items: [{x: 2, y: 2, collected: false}, {x: 4, y: 2, collected: false}],
+                map: [
+                    [0,0,0,0,0],
+                    [0,0,0,0,3],
+                    [0,0,4,1,4],
+                    [0,0,1,0,0],
+                    [0,0,1,0,0]
+                ]
+            },
+            {
+                id: 7,
+                name: "ด่านที่ 7: ทางตันเลี้ยวกลับ",
+                desc: "วางแผนเลี้ยวหมุนตัวเพื่อเดินกลับทางเดิม",
+                gridSize: [5, 5],
+                start: { x: 0, y: 2, dir: 1 },
+                items: [{x: 3, y: 2, collected: false}],
+                map: [
+                    [0,0,0,0,0],
+                    [3,1,0,0,0],
+                    [1,1,1,4,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0]
+                ]
+            },
+            {
+                id: 8,
+                name: "ด่านที่ 8: เขาวงกตขนาดเล็ก",
+                desc: "ค้นหาเส้นทางที่ถูกต้องผ่านกำแพงซับซ้อน",
+                gridSize: [6, 6],
+                start: { x: 0, y: 0, dir: 1 },
+                map: [
+                    [1,1,2,2,2,2],
+                    [2,1,1,1,2,2],
+                    [2,2,2,1,2,2],
+                    [2,1,1,1,1,2],
+                    [2,1,2,2,1,2],
+                    [2,1,1,1,3,2]
+                ]
+            },
+            {
+                id: 9,
+                name: "ด่านที่ 9: ระวังหนามแหลม!",
+                desc: "หลีกเลี่ยงอันตรายจากกับดักหนาม ⚠️",
+                gridSize: [6, 6],
+                start: { x: 0, y: 5, dir: 0 },
+                map: [
+                    [0,0,0,0,0,3],
+                    [0,0,0,0,1,1],
+                    [0,0,5,1,1,5],
+                    [0,1,1,5,0,0],
+                    [0,1,5,0,0,0],
+                    [1,1,0,0,0,0]
+                ]
+            },
+            {
+                id: 10,
+                name: "ด่านที่ 10: ภารกิจเก็บสมบัติกลางวงกต",
+                desc: "เก็บเพชร 3 เม็ดในเขาวงกตแล้วไปยังจุดหมาย",
+                gridSize: [6, 6],
+                start: { x: 0, y: 0, dir: 2 },
+                items: [
+                    {x: 0, y: 3, collected: false},
+                    {x: 3, y: 3, collected: false},
+                    {x: 5, y: 1, collected: false}
+                ],
+                map: [
+                    [1,2,2,2,2,2],
+                    [1,1,1,2,4,1],
+                    [2,2,1,2,1,1],
+                    [4,1,1,4,1,2],
+                    [2,2,2,2,1,2],
+                    [2,2,2,2,3,2]
+                ]
+            },
+            {
+                id: 11,
+                name: "ด่านที่ 11: ทางวนรอบทิศ",
+                desc: "วางแผนการเดินเป็นรูปสี่เหลี่ยมวนเพื่อเก็บของ",
+                gridSize: [6, 6],
+                start: { x: 1, y: 1, dir: 1 },
+                items: [
+                    {x: 4, y: 1, collected: false},
+                    {x: 4, y: 4, collected: false},
+                    {x: 1, y: 4, collected: false}
+                ],
+                map: [
+                    [0,0,0,0,0,0],
+                    [0,1,1,1,4,0],
+                    [0,1,0,0,1,0],
+                    [0,1,0,0,1,0],
+                    [0,4,1,1,4,0],
+                    [0,0,3,0,0,0]
+                ]
+            },
+            {
+                id: 12,
+                name: "ด่านที่ 12: การทดสอบระยะไกล",
+                desc: "เส้นทางยาวไกล ลากคำสั่งอย่างมีสติและระมัดระวัง",
+                gridSize: [7, 7],
+                start: { x: 0, y: 6, dir: 0 },
+                map: [
+                    [2,2,2,2,2,2,3],
+                    [2,2,2,2,2,1,1],
+                    [2,2,2,2,1,1,2],
+                    [2,2,2,1,1,2,2],
+                    [2,2,1,1,2,2,2],
+                    [2,1,1,2,2,2,2],
+                    [1,1,2,2,2,2,2]
+                ]
+            },
+            {
+                id: 13,
+                name: "ด่านที่ 13: ด่านหนามล้อมรอบ",
+                desc: "เดินบนเส้นทางแคบๆ ที่มีอันตรายขนาบข้าง",
+                gridSize: [6, 6],
+                start: { x: 0, y: 0, dir: 1 },
+                items: [{x: 5, y: 0, collected: false}],
+                map: [
+                    [1,1,1,1,1,4],
+                    [5,5,5,5,5,1],
+                    [1,1,1,1,5,1],
+                    [1,5,5,1,5,1],
+                    [1,5,3,1,1,1],
+                    [1,1,1,5,5,5]
+                ]
+            },
+            {
+                id: 14,
+                name: "ด่านที่ 14: ป่าเพชรมืด",
+                desc: "เก็บเพชรให้ครบ 4 เม็ดในเส้นทางที่ซับซ้อน",
+                gridSize: [6, 6],
+                start: { x: 0, y: 5, dir: 0 },
+                items: [
+                    {x: 0, y: 0, collected: false},
+                    {x: 5, y: 0, collected: false},
+                    {x: 5, y: 5, collected: false},
+                    {x: 2, y: 2, collected: false}
+                ],
+                map: [
+                    [4,1,1,1,1,4],
+                    [1,2,2,2,2,1],
+                    [1,2,4,1,2,1],
+                    [1,2,1,1,2,1],
+                    [1,2,2,2,2,1],
+                    [1,1,1,1,1,4]
+                ],
+                goalOverride: {x: 3, y: 3} // Special Goal location inside inner loop
+            },
+            {
+                id: 15,
+                name: "ด่านที่ 15: มหาศึกปรมาจารย์โค้ดดิ้ง",
+                desc: "ด่านสุดท้าย! วางแผนข้ามเขาวงกตขนาดใหญ่ เก็บเพชรทั้งหมด และพิชิตเกม!",
+                gridSize: [7, 7],
+                start: { x: 0, y: 0, dir: 1 },
+                items: [
+                    {x: 6, y: 0, collected: false},
+                    {x: 0, y: 6, collected: false},
+                    {x: 3, y: 3, collected: false}
+                ],
+                map: [
+                    [1,1,1,1,1,1,4],
+                    [2,2,2,1,2,2,1],
+                    [1,1,1,1,2,1,1],
+                    [1,2,2,4,2,1,2],
+                    [1,1,2,1,1,1,2],
+                    [2,1,2,2,2,1,2],
+                    [4,1,1,1,1,1,3]
+                ]
+            }
         ];
 
+        // -------------------------------------------------------------
+        // Game State Variables
+        // -------------------------------------------------------------
         let currentLevelIdx = 0;
-        let program = [];
+        let playerPos = { x: 0, y: 0, dir: 1 };
+        let levelItems = [];
+        let programSequence = [];
         let isRunning = false;
+        let dragSrcEl = null;
 
-        // Robot & Box State
-        let robot = { x: 1, y: 7, dir: DIR.UP, hasBox: false };
-        let box = { x: 1, y: 4, picked: false };
-        let activeStepIndex = -1;
+        // Direction vectors: 0: Up, 1: Right, 2: Down, 3: Left
+        const DIR_OFFSETS = [
+            { x: 0, y: -1, angle: -90 }, // Up
+            { x: 1, y: 0, angle: 0 },    // Right
+            { x: 0, y: 1, angle: 90 },   // Down
+            { x: -1, y: 0, angle: 180 }  // Left
+        ];
 
-        // Canvas Setup
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let cellSize = 40;
-
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            const size = Math.min(container.clientWidth, container.clientHeight) - 10;
-            const clampedSize = Math.max(280, Math.min(size, 540));
-            canvas.width = clampedSize;
-            canvas.height = clampedSize;
-            cellSize = canvas.width / GRID_SIZE;
-            draw();
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-
-        // Command Block Definitions
-        const COMMAND_INFO = {
-            'FORWARD': { name: 'เดินหน้า', icon: '⬆️', color: 'bg-emerald-600/30 text-emerald-300 border-emerald-500/40' },
-            'BACKWARD': { name: 'ถอยหลัง', icon: '⬇️', color: 'bg-emerald-700/30 text-emerald-300 border-emerald-600/40' },
-            'LEFT': { name: 'หมุนซ้าย', icon: '↩️', color: 'bg-blue-600/30 text-blue-300 border-blue-500/40' },
-            'RIGHT': { name: 'หมุนขวา', icon: '↪️', color: 'bg-blue-600/30 text-blue-300 border-blue-500/40' },
-            'PICKUP': { name: 'หยิบกล่อง', icon: '📥', color: 'bg-amber-600/30 text-amber-300 border-amber-500/40' },
-            'DROP': { name: 'วางกล่อง', icon: '📤', color: 'bg-purple-600/30 text-purple-300 border-purple-500/40' }
+        // -------------------------------------------------------------
+        // Initialization & Level Loading
+        // -------------------------------------------------------------
+        window.onload = () => {
+            initLevelSelector();
+            setupDragAndDrop();
+            loadLevel(0);
         };
 
-        function initLevel(levelIdx) {
-            const lvl = LEVELS[levelIdx];
-            robot = { ...lvl.start, hasBox: false };
-            box = { ...lvl.box, picked: false };
-            
-            // Clear programming sequence upon changing level
-            clearProgram();
-
-            document.getElementById('level-badge').innerText = `Level ${lvl.id} / ${LEVELS.length}`;
-            document.getElementById('mission-text').innerText = lvl.mission;
-            
-            draw();
-        }
-
-        function addCommand(cmd) {
-            if (isRunning) return;
-            program.push(cmd);
-            renderProgramList();
-        }
-
-        function removeCommand(idx) {
-            if (isRunning) return;
-            program.splice(idx, 1);
-            renderProgramList();
-        }
-
-        function clearProgram() {
-            if (isRunning) return;
-            program = [];
-            renderProgramList();
-        }
-
-        function renderProgramList() {
-            const listEl = document.getElementById('program-list');
-            const emptyMsg = document.getElementById('empty-msg');
-            document.getElementById('step-count').innerText = `${program.length} คำสั่ง`;
-
-            if (program.length === 0) {
-                listEl.innerHTML = '';
-                listEl.appendChild(emptyMsg);
-                emptyMsg.classList.remove('hidden');
-                return;
-            }
-
-            listEl.innerHTML = '';
-            program.forEach((cmd, idx) => {
-                const info = COMMAND_INFO[cmd];
-                const isActive = idx === activeStepIndex;
-                const item = document.createElement('div');
-                item.className = `flex items-center justify-between p-2 rounded-xl text-xs font-medium border transition-all ${info.color} ${isActive ? 'ring-2 ring-yellow-400 scale-[1.02]' : ''}`;
-                item.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-500 w-4 font-mono">${idx + 1}.</span>
-                        <span>${info.icon}</span>
-                        <span>${info.name}</span>
-                    </div>
-                    <button onclick="removeCommand(${idx})" class="text-slate-400 hover:text-red-400 px-1 font-bold">✕</button>
-                `;
-                listEl.appendChild(item);
+        function initLevelSelector() {
+            const select = document.getElementById('levelSelect');
+            select.innerHTML = '';
+            LEVELS.forEach((lvl, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `ด่าน ${lvl.id}: ${lvl.name.split(':')[1] || lvl.name}`;
+                select.appendChild(opt);
             });
         }
 
-        function resetGame() {
-            isRunning = false;
-            activeStepIndex = -1;
+        function loadLevel(idx) {
+            currentLevelIdx = idx;
+            document.getElementById('levelSelect').value = idx;
             const lvl = LEVELS[currentLevelIdx];
-            robot = { ...lvl.start, hasBox: false };
-            box = { ...lvl.box, picked: false };
-            draw();
-            renderProgramList();
-            document.getElementById('run-btn').disabled = false;
+
+            document.getElementById('levelTitle').textContent = lvl.name;
+            document.getElementById('levelDesc').textContent = lvl.desc;
+
+            // Reset Position and Items
+            playerPos = { ...lvl.start };
+            levelItems = lvl.items ? JSON.parse(JSON.stringify(lvl.items)) : [];
+            
+            // Clear Workspace & State
+            resetWorkspace();
+            renderMap();
         }
 
-        function prevLevel() {
-            currentLevelIdx = (currentLevelIdx - 1 + LEVELS.length) % LEVELS.length;
-            initLevel(currentLevelIdx);
+        function changeLevel(idx) {
+            if (isRunning) return;
+            loadLevel(parseInt(idx));
         }
 
-        function nextLevel() {
-            currentLevelIdx = (currentLevelIdx + 1) % LEVELS.length;
-            initLevel(currentLevelIdx);
+        // -------------------------------------------------------------
+        // Rendering Map & Player
+        // -------------------------------------------------------------
+        function renderMap() {
+            const lvl = LEVELS[currentLevelIdx];
+            const grid = document.getElementById('gridMap');
+            grid.innerHTML = '';
+
+            const [cols, rows] = lvl.gridSize;
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = c;
+                    cell.dataset.y = r;
+
+                    const tileType = lvl.map[r][c];
+
+                    if (tileType === 2) cell.classList.add('wall');
+                    else cell.classList.add('path');
+
+                    if (tileType === 3 || (lvl.goalOverride && lvl.goalOverride.x === c && lvl.goalOverride.y === r)) {
+                        cell.classList.add('goal');
+                        cell.innerHTML = '🏁';
+                    } else if (tileType === 5) {
+                        cell.classList.add('hazard');
+                        cell.innerHTML = '⚠️';
+                    }
+
+                    // Render Items (Gems)
+                    const item = levelItems.find(i => i.x === c && i.y === r && !i.collected);
+                    if (item) {
+                        cell.innerHTML = '💎';
+                    }
+
+                    // Render Player Start/Current Position
+                    if (playerPos.x === c && playerPos.y === r) {
+                        const playerEl = document.createElement('div');
+                        playerEl.className = 'player';
+                        playerEl.id = 'playerRobot';
+                        playerEl.innerHTML = '🤖';
+                        playerEl.style.transform = `rotate(${DIR_OFFSETS[playerPos.dir].angle}deg)`;
+                        cell.appendChild(playerEl);
+                    }
+
+                    grid.appendChild(cell);
+                }
+            }
         }
 
-        // Program Execution Logic
-        async function runProgram() {
-            if (isRunning || program.length === 0) return;
+        // -------------------------------------------------------------
+        // Drag and Drop Logic
+        // -------------------------------------------------------------
+        function setupDragAndDrop() {
+            const toolboxBlocks = document.querySelectorAll('.toolbox .code-block');
+            const workspace = document.getElementById('programWorkspace');
+
+            toolboxBlocks.forEach(block => {
+                block.addEventListener('dragstart', handleDragStart);
+            });
+
+            workspace.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                workspace.classList.add('drag-over');
+            });
+
+            workspace.addEventListener('dragleave', () => {
+                workspace.classList.remove('drag-over');
+            });
+
+            workspace.addEventListener('drop', handleDrop);
+        }
+
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            e.dataTransfer.setData('text/plain', this.dataset.type);
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const workspace = document.getElementById('programWorkspace');
+            workspace.classList.remove('drag-over');
+
+            if (isRunning) return;
+
+            const type = e.dataTransfer.getData('text/plain');
+            if (type) {
+                addBlockToWorkspace(type);
+            }
+        }
+
+        function addBlockToWorkspace(type) {
+            const workspace = document.getElementById('programWorkspace');
+            const emptyHint = document.getElementById('emptyHint');
+            if (emptyHint) emptyHint.style.display = 'none';
+
+            const blockConfig = {
+                move: { title: 'เดินหน้า', icon: '⬆️', class: 'block-move' },
+                turnLeft: { title: 'หมุนซ้าย', icon: '↩️', class: 'block-turn-left' },
+                turnRight: { title: 'หมุนขวา', icon: '↪️', class: 'block-turn-right' },
+                collect: { title: 'เก็บของ / ทำงาน', icon: '💎', class: 'block-action' }
+            };
+
+            const config = blockConfig[type];
+            if (!config) return;
+
+            const blockEl = document.createElement('div');
+            blockEl.className = `code-block workspace-block ${config.class}`;
+            blockEl.dataset.type = type;
+            
+            blockEl.innerHTML = `
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span>${config.icon}</span>
+                    <span>${config.title}</span>
+                </div>
+                <button class="remove-btn" onclick="removeBlock(this)">×</button>
+            `;
+
+            workspace.appendChild(blockEl);
+            programSequence.push(type);
+        }
+
+        function removeBlock(btn) {
+            if (isRunning) return;
+            const blockEl = btn.parentElement;
+            const index = Array.from(blockEl.parentElement.children).indexOf(blockEl) - 1; // offset hint
+            blockEl.remove();
+            
+            const workspace = document.getElementById('programWorkspace');
+            const remainingBlocks = workspace.querySelectorAll('.workspace-block');
+            
+            if (remainingBlocks.length === 0) {
+                document.getElementById('emptyHint').style.display = 'block';
+                programSequence = [];
+            } else {
+                updateSequenceFromDOM();
+            }
+        }
+
+        function updateSequenceFromDOM() {
+            const blocks = document.querySelectorAll('.workspace-block');
+            programSequence = Array.from(blocks).map(b => b.dataset.type);
+        }
+
+        function resetWorkspace() {
+            const workspace = document.getElementById('programWorkspace');
+            workspace.innerHTML = '<div class="empty-hint" id="emptyHint">ลากคำสั่งมาวางที่นี่เพื่อสร้างโปรแกรม...</div>';
+            programSequence = [];
+        }
+
+        // -------------------------------------------------------------
+        // Game Execution Engine
+        // -------------------------------------------------------------
+        async function runCode() {
+            if (isRunning) return;
+            if (programSequence.length === 0) {
+                alert('กรุณาลากบล็อกคำสั่งวางในพื้นที่โปรแกรมก่อนครับ!');
+                return;
+            }
+
             isRunning = true;
-            document.getElementById('run-btn').disabled = true;
+            document.getElementById('runBtn').disabled = true;
 
-            const lvl = LEVELS[currentLevelIdx];
+            const workspaceBlocks = document.querySelectorAll('.workspace-block');
 
-            for (let i = 0; i < program.length; i++) {
-                if (!isRunning) break;
-                activeStepIndex = i;
-                renderProgramList();
+            for (let i = 0; i < programSequence.length; i++) {
+                if (!isRunning) break; // If reset clicked mid-run
 
-                const cmd = program[i];
-                let success = executeCommand(cmd);
+                // Highlight executing block
+                workspaceBlocks[i].classList.add('executing');
 
-                draw();
-                await new Promise(res => setTimeout(res, 400));
+                const command = programSequence[i];
+                const success = await executeCommand(command);
+
+                workspaceBlocks[i].classList.remove('executing');
 
                 if (!success) {
-                    showModal(false, "หุ่นยนต์ตกจากเส้นทางที่กำหนด!");
+                    showModal('💥', 'ภารกิจล้มเหลว!', 'หุ่นยนต์เดินชนกำแพง หรือตกอยู่ในอันตราย ลองแก้ไขแผนดูใหม่นะ', 'ลองอีกครั้ง', false);
                     isRunning = false;
-                    break;
+                    document.getElementById('runBtn').disabled = false;
+                    return;
                 }
+
+                await sleep(400);
             }
 
-            if (isRunning) {
-                activeStepIndex = -1;
-                renderProgramList();
-                
-                // Check Win Condition
-                if (robot.x === lvl.target.x && robot.y === lvl.target.y && !robot.hasBox && box.x === lvl.target.x && box.y === lvl.target.y) {
-                    showModal(true, "ยินดีด้วย! คุณส่งกล่องถึงจุดหมายสำเร็จแล้ว 🎉");
-                } else {
-                    showModal(false, "ยังไม่บรรลุเป้าหมาย ตรวจสอบการหยิบ/วางกล่อง หรือจุดหมายปลายทาง");
-                }
-                isRunning = false;
-            }
+            // Check Win Condition after all commands finish
+            checkWinCondition();
+            isRunning = false;
+            document.getElementById('runBtn').disabled = false;
         }
 
         function executeCommand(cmd) {
-            if (cmd === 'FORWARD') {
-                const offset = DIR_OFFSETS[robot.dir];
-                const nx = robot.x + offset.x;
-                const ny = robot.y + offset.y;
-                if (!isValidMove(nx, ny)) return false;
-                robot.x = nx;
-                robot.y = ny;
-                if (robot.hasBox) {
-                    box.x = nx;
-                    box.y = ny;
-                }
-            } else if (cmd === 'BACKWARD') {
-                const offset = DIR_OFFSETS[robot.dir];
-                const nx = robot.x - offset.x;
-                const ny = robot.y - offset.y;
-                if (!isValidMove(nx, ny)) return false;
-                robot.x = nx;
-                robot.y = ny;
-                if (robot.hasBox) {
-                    box.x = nx;
-                    box.y = ny;
-                }
-            } else if (cmd === 'LEFT') {
-                robot.dir = (robot.dir + 3) % 4;
-            } else if (cmd === 'RIGHT') {
-                robot.dir = (robot.dir + 1) % 4;
-            } else if (cmd === 'PICKUP') {
-                if (!robot.hasBox && robot.x === box.x && robot.y === box.y) {
-                    robot.hasBox = true;
-                    box.picked = true;
-                }
-            } else if (cmd === 'DROP') {
-                if (robot.hasBox) {
-                    robot.hasBox = false;
-                    box.picked = false;
-                    box.x = robot.x;
-                    box.y = robot.y;
-                }
-            }
-            return true;
-        }
+            return new Promise((resolve) => {
+                const lvl = LEVELS[currentLevelIdx];
+                const [cols, rows] = lvl.gridSize;
 
-        function isValidMove(x, y) {
-            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return false;
-            return MAP_GRID[y][x] > 0;
-        }
+                if (cmd === 'move') {
+                    const offset = DIR_OFFSETS[playerPos.dir];
+                    const nextX = playerPos.x + offset.x;
+                    const nextY = playerPos.y + offset.y;
 
-        // Drawing Functions
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            drawGridAndTracks();
-            drawTarget();
-            drawBox();
-            drawRobot();
-        }
+                    // Out of bounds check
+                    if (nextX < 0 || nextX >= cols || nextY < 0 || nextY >= rows) {
+                        resolve(false);
+                        return;
+                    }
 
-        function drawGridAndTracks() {
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    const x = c * cellSize;
-                    const y = r * cellSize;
-                    
-                    ctx.strokeStyle = "rgba(16, 185, 129, 0.1)";
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(x, y, cellSize, cellSize);
+                    // Wall check
+                    if (lvl.map[nextY][nextX] === 2) {
+                        resolve(false);
+                        return;
+                    }
 
-                    if (MAP_GRID[r][c] > 0) {
-                        const isTop = r > 0 && MAP_GRID[r-1][c] > 0;
-                        const isBottom = r < GRID_SIZE-1 && MAP_GRID[r+1][c] > 0;
-                        const isLeft = c > 0 && MAP_GRID[r][c-1] > 0;
-                        const isRight = c < GRID_SIZE-1 && MAP_GRID[r][c+1] > 0;
+                    // Hazard check
+                    if (lvl.map[nextY][nextX] === 5) {
+                        playerPos.x = nextX;
+                        playerPos.y = nextY;
+                        renderMap();
+                        resolve(false);
+                        return;
+                    }
 
-                        const cx = x + cellSize / 2;
-                        const cy = y + cellSize / 2;
-                        const trackWidth = cellSize * 0.28;
-
-                        ctx.fillStyle = "#0f172a";
-                        if (isTop) ctx.fillRect(cx - trackWidth/2, y, trackWidth, cellSize/2);
-                        if (isBottom) ctx.fillRect(cx - trackWidth/2, cy, trackWidth, cellSize/2);
-                        if (isLeft) ctx.fillRect(x, cy - trackWidth/2, cellSize/2, trackWidth);
-                        if (isRight) ctx.fillRect(cx, cy - trackWidth/2, cellSize/2, trackWidth);
-
-                        if (MAP_GRID[r][c] === 2) {
-                            ctx.fillStyle = "#334155";
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, trackWidth * 0.7, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
+                    playerPos.x = nextX;
+                    playerPos.y = nextY;
+                } else if (cmd === 'turnLeft') {
+                    playerPos.dir = (playerPos.dir + 3) % 4;
+                } else if (cmd === 'turnRight') {
+                    playerPos.dir = (playerPos.dir + 1) % 4;
+                } else if (cmd === 'collect') {
+                    // Check if current cell has item
+                    const item = levelItems.find(i => i.x === playerPos.x && i.y === playerPos.y && !i.collected);
+                    if (item) {
+                        item.collected = true;
                     }
                 }
-            }
+
+                renderMap();
+                resolve(true);
+            });
         }
 
-        function drawTarget() {
+        function checkWinCondition() {
             const lvl = LEVELS[currentLevelIdx];
-            const cx = lvl.target.x * cellSize + cellSize / 2;
-            const cy = lvl.target.y * cellSize + cellSize / 2;
-
-            ctx.fillStyle = "rgba(168, 85, 247, 0.25)";
-            ctx.strokeStyle = "#a855f7";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(cx, cy, cellSize * 0.38, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#e9d5ff";
-            ctx.font = `bold ${Math.max(9, cellSize * 0.2)}px Kanit`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(lvl.target.label, cx, cy);
-        }
-
-        function drawBox() {
-            if (robot.hasBox) return;
-
-            const bx = box.x * cellSize + cellSize * 0.2;
-            const by = box.y * cellSize + cellSize * 0.2;
-            const size = cellSize * 0.6;
-
-            draw3DBox(bx, by, size);
-        }
-
-        function draw3DBox(x, y, size) {
-            const depth = size * 0.25;
-
-            ctx.fillStyle = "#d97706";
-            ctx.beginPath();
-            ctx.moveTo(x, y + depth);
-            ctx.lineTo(x + size / 2, y);
-            ctx.lineTo(x + size, y + depth);
-            ctx.lineTo(x + size / 2, y + depth * 2);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = "#b45309";
-            ctx.beginPath();
-            ctx.moveTo(x, y + depth);
-            ctx.lineTo(x + size / 2, y + depth * 2);
-            ctx.lineTo(x + size / 2, y + size);
-            ctx.lineTo(x, y + size - depth);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = "#78350f";
-            ctx.beginPath();
-            ctx.moveTo(x + size / 2, y + depth * 2);
-            ctx.lineTo(x + size, y + depth);
-            ctx.lineTo(x + size, y + size - depth);
-            ctx.lineTo(x + size / 2, y + size);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function drawRobot() {
-            const cx = robot.x * cellSize + cellSize / 2;
-            const cy = robot.y * cellSize + cellSize / 2;
-            const rSize = cellSize * 0.7;
-
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate((robot.dir * 90) * Math.PI / 180);
-
-            ctx.fillStyle = "#3b82f6";
-            ctx.beginPath();
-            ctx.roundRect(-rSize/2, -rSize/2, rSize, rSize, 8);
-            ctx.fill();
-
-            ctx.fillStyle = "#60a5fa";
-            ctx.beginPath();
-            ctx.roundRect(-rSize*0.35, -rSize*0.35, rSize*0.7, rSize*0.7, 5);
-            ctx.fill();
-
-            ctx.fillStyle = "#0f172a";
-            ctx.fillRect(-rSize*0.55, -rSize*0.4, rSize*0.12, rSize*0.8);
-            ctx.fillRect(rSize*0.43, -rSize*0.4, rSize*0.12, rSize*0.8);
-
-            ctx.fillStyle = "#06b6d4";
-            ctx.beginPath();
-            ctx.arc(-rSize*0.18, -rSize*0.25, rSize*0.1, 0, Math.PI * 2);
-            ctx.arc(rSize*0.18, -rSize*0.25, rSize*0.1, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = "#ef4444";
-            ctx.beginPath();
-            ctx.moveTo(0, -rSize*0.48);
-            ctx.lineTo(-rSize*0.15, -rSize*0.3);
-            ctx.lineTo(rSize*0.15, -rSize*0.3);
-            ctx.closePath();
-            ctx.fill();
-
-            if (robot.hasBox) {
-                draw3DBox(-rSize*0.3, -rSize*0.3, rSize*0.6);
+            
+            // Check if all items collected
+            const uncollectedItems = levelItems.filter(i => !i.collected);
+            if (uncollectedItems.length > 0) {
+                showModal('💎', 'ยังเก็บเพชรไม่ครบ!', 'คุณต้องวางแผนเดินไปเก็บเพชรให้ครบทุกเม็ดก่อน', 'ลองใหม่', false);
+                return;
             }
 
-            ctx.restore();
-        }
-
-        // Modal Controls
-        function showModal(isSuccess, message) {
-            const modal = document.getElementById('modal');
-            const card = document.getElementById('modal-card');
-            const icon = document.getElementById('modal-icon');
-            const title = document.getElementById('modal-title');
-            const msg = document.getElementById('modal-msg');
-            const nextBtn = document.getElementById('modal-next-btn');
-
-            icon.innerText = isSuccess ? '🎉' : '❌';
-            title.innerText = isSuccess ? 'ภารกิจสำเร็จ!' : 'ภารกิจไม่สำเร็จ';
-            title.className = `text-xl font-bold mb-2 ${isSuccess ? 'text-emerald-400' : 'text-rose-400'}`;
-            msg.innerText = message;
-
-            if (isSuccess && currentLevelIdx < LEVELS.length - 1) {
-                nextBtn.classList.remove('hidden');
+            // Check if at goal position
+            let isAtGoal = false;
+            if (lvl.goalOverride) {
+                isAtGoal = (playerPos.x === lvl.goalOverride.x && playerPos.y === lvl.goalOverride.y);
             } else {
-                nextBtn.classList.add('hidden');
+                isAtGoal = (lvl.map[playerPos.y][playerPos.x] === 3);
             }
 
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                card.classList.remove('scale-95', 'opacity-0');
-                card.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            if (isAtGoal) {
+                if (currentLevelIdx === LEVELS.length - 1) {
+                    showModal('🏆', 'ยินดีด้วย! คุณคือสุดยอดนักเขียนโค้ด!', 'คุณสามารถผ่านด่านวางแผนได้ครบทั้ง 15 ด่านอย่างสมบูรณ์แบบ!', 'เล่นอีกครั้ง', true);
+                } else {
+                    showModal('🎉', 'ผ่านด่านสำเร็จ!', `ยอดเยี่ยมมาก! คุณผ่าน ${lvl.name} แล้ว`, 'ไปด่านถัดไป ➔', true);
+                }
+            } else {
+                showModal('📍', 'ยังไม่ถึงจุดหมาย!', 'หุ่นยนต์ยังเดินไปไม่ถึงจุดหมาย 🏁 ลองปรับคำสั่งดูใหม่นะ', 'ลองอีกครั้ง', false);
+            }
+        }
+
+        function resetLevel() {
+            isRunning = false;
+            document.getElementById('runBtn').disabled = false;
+            const lvl = LEVELS[currentLevelIdx];
+            playerPos = { ...lvl.start };
+            levelItems = lvl.items ? JSON.parse(JSON.stringify(lvl.items)) : [];
+            renderMap();
+        }
+
+        // -------------------------------------------------------------
+        // Modal Helper
+        // -------------------------------------------------------------
+        function showModal(icon, title, desc, btnText, isSuccess) {
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').textContent = desc;
+            
+            const btn = document.getElementById('modalBtn');
+            btn.textContent = btnText;
+            
+            if (isSuccess) {
+                btn.onclick = () => {
+                    closeModal();
+                    if (currentLevelIdx < LEVELS.length - 1) {
+                        loadLevel(currentLevelIdx + 1);
+                    } else {
+                        loadLevel(0); // Restart from lvl 1
+                    }
+                };
+            } else {
+                btn.onclick = () => {
+                    closeModal();
+                    resetLevel();
+                };
+            }
+
+            document.getElementById('modal').classList.add('active');
         }
 
         function closeModal() {
-            const modal = document.getElementById('modal');
-            const card = document.getElementById('modal-card');
-            card.classList.remove('scale-100', 'opacity-100');
-            card.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 150);
+            document.getElementById('modal').classList.remove('active');
         }
 
-        // Prevent pull-to-refresh on mobile
-        document.body.addEventListener('touchmove', function(e) {
-            if (e.target.closest('#program-list')) return;
-            e.preventDefault();
-        }, { passive: false });
-
-        // Initialize Game
-        window.onload = () => {
-            resizeCanvas();
-            initLevel(0);
-        };
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
     </script>
 </body>
 </html>
+coding_adventure_game.html
+กำลังแสดง coding_adventure_game.html
