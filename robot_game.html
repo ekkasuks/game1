@@ -634,6 +634,31 @@
                     renderGrid();
                 }
             }
+// ฟังก์ชันเมื่อชนะในด่านปัจจุบัน
+function onMissionComplete() {
+    // 1. หยุดการทำงานหรือการคำนวณของด่านเดิม
+    clearInterval(gameTimer);
+    
+    // 2. อัปเดตระดับด่าน
+    currentLevel++;
+
+    // 3. ตรวจสอบว่ายังมีด่านถัดไปหรือไม่
+    if (currentLevel <= totalLevels) {
+        // โหลดด่านถัดไปทันที
+        startLevel(currentLevel);
+    } else {
+        // ถ้าเล่นจบทุกด่านแล้ว ให้ไปหน้าชนะเกม
+        showGameCompleteScreen();
+    }
+}
+
+// ฟังก์ชันเริ่มด่าน
+function startLevel(levelNumber) {
+    console.log("กำลังเริ่มด่านที่: " + levelNumber);
+    // รีเซ็ตค่าตัวละคร/ตำแหน่ง/เวลา แล้วเริ่มเกม
+    resetPlayerPosition();
+    loadLevelData(levelNumber);
+}
 
             function disableControls(disabled) {
                 document.getElementById('btn-run-code').disabled = disabled;
