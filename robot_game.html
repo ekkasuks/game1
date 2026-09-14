@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CODE - หุ่นยนต์น้อยภารกิจช่วยงานบ้าน 🤖🧹</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Prompt & Fredoka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mint: '#e0f2e9',
+                        mintDark: '#a3d9c9',
+                        mustard: '#f6ca69',
+                        sky: '#a8dadc',
+                        skyDark: '#457b9d',
+                        brown: '#8a5a44',
+                        pastelBg: '#f8f9fa'
+                    },
+                    fontFamily: {
+                        prompt: ['Prompt', 'sans-serif'],
+                        fredoka: ['Fredoka', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f3f7f5;
+            touch-action: manipulation;
+        }
+        .font-fredoka { font-family: 'Fredoka', cursive; }
+        .grid-cell {
+            aspect-ratio: 1 / 1;
+            transition: all 0.2s ease;
+        }
+        .robot-transition {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        /* Custom Scrollbar for Code Slot */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a8dadc;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #457b9d;
+        }
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-x-hidden flex flex-col justify-between text-slate-700 bg-mint/30 select-none">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-white shadow-sm border-b-4 border-mintDark px-4 py-2 flex-none z-10">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <span class="text-3xl animate-bounce-subtle">🤖</span>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold font-fredoka text-brown leading-tight">CODE ROBOT</h1>
+                    <p class="text-xs text-emerald-600 font-medium">ภารกิจหุ่นยนต์น้อยช่วยงานบ้าน 🧹</p>
+                </div>
+            </div>
+
+            <!-- Mode Selector Tabs -->
+            <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs md:text-sm font-semibold">
+                <button id="btn-mode-1" onclick="switchMode(1)" class="px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-mustard text-brown shadow-sm">
+                    <i class="fa-solid fa-code"></i> <span class="hidden sm:inline">โหมด</span>ภารกิจ
+                </button>
+                <button id="btn-mode-2" onclick="switchMode(2)" class="px-3 py-1.5 rounded-xl transition flex items-center gap-1 text-slate-600 hover:text-brown">
+                    <i class="fa-solid fa-map-location-dot"></i> <span class="hidden sm:inline">โหมด</span>ทายพิกัด
+                </button>
+                <button id="btn-mode-3" onclick="switchMode(3)" class="px-3 py-1.5 rounded-xl transition flex items-center gap-1 text-slate-600 hover:text-brown">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline">โหมด</span>สร้างด่าน
+                </button>
+            </div>
+
+            <!-- Sound & Global Controls -->
+            <div class="flex items-center space-x-2">
+                <button id="btn-sound" onclick="toggleSound()" class="w-10 h-10 rounded-full bg-sky/40 text-skyDark flex items-center justify-center hover:bg-sky transition font-bold shadow-sm">
+                    <i class="fa-solid fa-volume-high text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-2 md:p-4 flex flex-col justify-center items-center overflow-y-auto">
+
+        <!-- ========================================== -->
+        <!-- MODE 1: CODING MISSION MODE -->
+        <!-- ========================================== -->
+        <div id="mode-coding" class="w-full flex flex-col lg:flex-row gap-4 justify-center items-center lg:items-start my-auto">
+            
+            <!-- Left Panel: Grid Display -->
+            <div class="flex flex-col items-center bg-white p-3 md:p-4 rounded-3xl shadow-md border-2 border-mintDark w-full max-w-[480px]">
+                <!-- Level Info & Selector Header -->
+                <div class="w-full flex justify-between items-center mb-2">
+                    <div class="flex items-center space-x-2">
+                        <select id="level-select" onchange="loadSelectedLevel()" class="bg-mint text-emerald-800 font-bold px-3 py-1 rounded-xl border border-emerald-300 text-xs md:text-sm focus:outline-none">
+                            <!-- Levels Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="text-xs md:text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
+                        เป้าหมาย: <span id="mission-target-text" class="text-emerald-600 font-bold">เก็บของให้หมด</span>
+                    </div>
+                </div>
+
+                <!-- Grid Board -->
+                <div id="grid-container" class="relative w-full bg-slate-50 border-2 border-slate-300 rounded-2xl p-1 md:p-2 shadow-inner">
+                    <!-- Grid dynamically generated here -->
+                </div>
+
+                <!-- Game Status Info Footer -->
+                <div class="w-full flex justify-between items-center mt-3 text-xs md:text-sm">
+                    <div class="flex items-center space-x-1 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-200">
+                        <span>🧺 เก็บไอเทม:</span>
+                        <span id="collected-count" class="font-bold text-yellow-700">0</span>
+                        <span>/</span>
+                        <span id="total-items-count" class="font-bold text-yellow-700">0</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="text-slate-500">ความเร็ว:</span>
+                        <button id="btn-speed" onclick="toggleSpeed()" class="bg-sky/30 text-skyDark px-2 py-0.5 rounded-md font-bold text-xs hover:bg-sky/60">
+                            1x ⚡
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Code Workspace & Direction Controls -->
+            <div class="flex flex-col gap-3 w-full max-w-[480px] lg:max-w-[440px]">
+                
+                <!-- Code Queue Display Box -->
+                <div class="bg-white p-3 md:p-4 rounded-3xl shadow-md border-2 border-sky flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm md:text-base text-slate-700 flex items-center gap-1">
+                            <i class="fa-solid fa-cubes text-skyDark"></i> ชุดคำสั่งของคุณ (<span id="command-count">0</span>/15)
+                        </span>
+                        <div class="flex gap-1">
+                            <button onclick="undoCommand()" class="bg-amber-100 text-amber-700 hover:bg-amber-200 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> ย้อนกลับ
+                            </button>
+                            <button onclick="clearCommands()" class="bg-rose-100 text-rose-600 hover:bg-rose-200 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> ล้าง
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Slot Container -->
+                    <div id="code-slots" class="bg-slate-100 min-h-[70px] max-h-[100px] p-2 rounded-2xl border-2 border-dashed border-slate-300 flex items-center gap-2 overflow-x-auto custom-scrollbar">
+                        <span id="empty-slot-msg" class="text-slate-400 text-xs text-center w-full">กดปุ่มลูกศรด้านล่างเพื่อเพิ่มคำสั่ง ⬇️</span>
+                    </div>
+                </div>
+
+                <!-- Command Input Control Pad -->
+                <div class="bg-white p-3 md:p-4 rounded-3xl shadow-md border-2 border-mustard flex flex-col gap-2">
+                    <div class="text-xs font-semibold text-slate-500 text-center mb-1">กดปุ่มทิศทางเพื่อวางบล็อกโค้ด</div>
+                    
+                    <!-- Direction Buttons Cross Layout -->
+                    <div class="grid grid-cols-3 gap-2 w-48 mx-auto">
+                        <div></div>
+                        <button onclick="addCommand('up')" class="bg-emerald-400 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl shadow-md active:translate-y-1 transition text-xl flex items-center justify-center">
+                            ⬆️
+                        </button>
+                        <div></div>
+                        <button onclick="addCommand('left')" class="bg-emerald-400 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl shadow-md active:translate-y-1 transition text-xl flex items-center justify-center">
+                            ⬅️
+                        </button>
+                        <button onclick="addCommand('down')" class="bg-emerald-400 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl shadow-md active:translate-y-1 transition text-xl flex items-center justify-center">
+                            ⬇️
+                        </button>
+                        <button onclick="addCommand('right')" class="bg-emerald-400 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl shadow-md active:translate-y-1 transition text-xl flex items-center justify-center">
+                            ➡️
+                        </button>
+                    </div>
+
+                    <!-- Run & Reset Buttons -->
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button id="btn-reset-code" onclick="resetMission()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-2xl shadow transition text-sm flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> เริ่มใหม่
+                        </button>
+                        <button id="btn-run-code" onclick="runCode()" class="bg-mustard hover:bg-amber-400 text-brown font-bold py-2.5 rounded-2xl shadow-md active:translate-y-0.5 transition text-sm flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-play text-lg"></i> เริ่มทำงาน!
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODE 2: COORDINATE QUIZ MODE -->
+        <!-- ========================================== -->
+        <div id="mode-quiz" class="hidden w-full flex-col lg:flex-row gap-4 justify-center items-center my-auto">
+            <!-- Left: Grid Display -->
+            <div class="flex flex-col items-center bg-white p-3 md:p-4 rounded-3xl shadow-md border-2 border-mintDark w-full max-w-[440px]">
+                <div id="quiz-grid-container" class="relative w-full bg-slate-50 border-2 border-slate-300 rounded-2xl p-1 md:p-2 shadow-inner">
+                    <!-- Quiz Grid dynamically rendered -->
+                </div>
+            </div>
+
+            <!-- Right: Quiz Question Card -->
+            <div class="flex flex-col gap-4 w-full max-w-[440px] bg-white p-5 rounded-3xl shadow-md border-2 border-sky">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-xs font-bold text-skyDark bg-sky/20 px-3 py-1 rounded-full">เกมทายพิกัดตำแหน่ง 🎯</span>
+                    <span class="text-sm font-bold text-emerald-600">คะแนน: <span id="quiz-score" class="text-lg font-fredoka">0</span></span>
+                </div>
+
+                <div class="text-center py-2">
+                    <div class="text-slate-500 text-xs mb-1">คำถามประจำข้อ:</div>
+                    <div id="quiz-question" class="text-lg md:text-xl font-bold text-brown">
+                        วัตถุ 🧹 อยู่ที่พิกัดช่องใด?
+                    </div>
+                </div>
+
+                <!-- Answer Options (4 Choices) -->
+                <div id="quiz-options" class="grid grid-cols-2 gap-3">
+                    <!-- Options generated dynamically -->
+                </div>
+
+                <div id="quiz-feedback" class="text-center font-bold min-h-[28px] text-sm"></div>
+
+                <button onclick="generateQuizQuestion()" class="w-full bg-mint text-emerald-800 hover:bg-mintDark font-bold py-2.5 rounded-2xl transition shadow text-sm">
+                    <i class="fa-solid fa-forward"></i> ข้อต่อไป
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODE 3: CUSTOM LEVEL EDITOR MODE -->
+        <!-- ========================================== -->
+        <div id="mode-editor" class="hidden w-full flex-col lg:flex-row gap-4 justify-center items-center my-auto">
+            <!-- Left: Grid Editor Display -->
+            <div class="flex flex-col items-center bg-white p-3 md:p-4 rounded-3xl shadow-md border-2 border-mintDark w-full max-w-[440px]">
+                <div class="text-xs font-bold text-slate-500 mb-2">คลิกที่ช่องตารางเพื่อวางวัตถุที่เลือก</div>
+                <div id="editor-grid-container" class="relative w-full bg-slate-50 border-2 border-slate-300 rounded-2xl p-1 md:p-2 shadow-inner">
+                    <!-- Editor Grid dynamically rendered -->
+                </div>
+            </div>
+
+            <!-- Right: Object Palette & Action Tools -->
+            <div class="flex flex-col gap-3 w-full max-w-[440px] bg-white p-4 rounded-3xl shadow-md border-2 border-mustard">
+                <h2 class="font-bold text-brown text-center border-b pb-1 text-base">เครื่องมือสร้างด่านของคุณ 🛠️</h2>
+
+                <div class="text-xs font-semibold text-slate-500">1. เลือกวัตถุที่ต้องการวาง:</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectTool('robot')" id="tool-robot" class="tool-btn bg-slate-100 border-2 border-slate-300 p-2 rounded-xl text-center text-xs font-bold hover:bg-slate-200 flex flex-col items-center">
+                        <span class="text-2xl">🤖</span> หุ่นยนต์
+                    </button>
+                    <button onclick="selectTool('target')" id="tool-target" class="tool-btn bg-slate-100 border-2 border-slate-300 p-2 rounded-xl text-center text-xs font-bold hover:bg-slate-200 flex flex-col items-center">
+                        <span class="text-2xl">🏠</span> บ้านเส้นชัย
+                    </button>
+                    <button onclick="selectTool('item1')" id="tool-item1" class="tool-btn bg-slate-100 border-2 border-slate-300 p-2 rounded-xl text-center text-xs font-bold hover:bg-slate-200 flex flex-col items-center">
+                        <span class="text-2xl">🧹</span> ไม้กวาด
+                    </button>
+                    <button onclick="selectTool('item2')" id="tool-item2" class="tool-btn bg-slate-100 border-2 border-slate-300 p-2 rounded-xl text-center text-xs font-bold hover:bg-slate-200 flex flex-col items-center">
+                        <span class="text-2xl">🧺</span> ตะกร้าผ้า
+                    </button>
+                    <button onclick="selectTool('obstacle')" id="tool-obstacle" class="tool-btn bg-slate-100 border-2 border-slate-300 p-2 rounded-xl text-center text-xs font-bold hover:bg-slate-200 flex flex-col items-center">
+                        <span class="text-2xl">🗑️</span> ถังขยะ
+                    </button>
+                    <button onclick="selectTool('eraser')" id="tool-eraser" class="tool-btn bg-slate-100 border-2 border-slate-300 p-2 rounded-xl text-center text-xs font-bold hover:bg-slate-200 flex flex-col items-center">
+                        <span class="text-2xl">🧼</span> ยางลบ
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border mt-1">
+                    <span>เงื่อนไข: วาง 🤖 1 ตัว และ 🏠 1 หลัง</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button onclick="clearEditorGrid()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold py-2 rounded-xl text-xs transition">
+                        <i class="fa-solid fa-rotate-left"></i> ล้างกระดาน
+                    </button>
+                    <button onclick="playCustomLevel()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs transition shadow-md">
+                        <i class="fa-solid fa-circle-play"></i> ทดลองเล่นด่านนี้!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL POPUP ALERTS -->
+    <!-- Alert/Victory Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-4 border-mustard transform transition-all scale-100">
+            <div id="modal-icon" class="text-6xl mb-3">🎉</div>
+            <h3 id="modal-title" class="text-xl font-bold text-brown mb-2 font-prompt">เก่งมากเด็กๆ!</h3>
+            <p id="modal-message" class="text-sm text-slate-600 mb-5">ผ่านภารกิจเรียบร้อยแล้ว!</p>
+            <button id="modal-btn" onclick="closeModal()" class="w-full bg-mustard hover:bg-amber-400 text-brown font-bold py-2.5 rounded-2xl shadow transition text-sm">
+                ตกลง 👍
+            </button>
+        </div>
+    </div>
+
+    <!-- AUDIO & GAME SCRIPT -->
+    <script>
+        // Safely wrap JavaScript code in Try-Catch for 100% stability
+        try {
+            // ==========================================
+            // CONSTANTS & CONFIGURATION
+            // ==========================================
+            const ROWS = 8; // A to H
+            const COLS = 7; // 1 to 7
+            const ROW_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            const COL_LABELS = ['1', '2', '3', '4', '5', '6', '7'];
+
+            const ITEM_EMOJIS = {
+                'broom': '🧹',
+                'basket': '🧺',
+                'dish': '🍽️',
+                'sponge': '🧽'
+            };
+
+            const OBSTACLE_EMOJIS = {
+                'trash': '🗑️',
+                'sofa': '🛋️',
+                'chair': '🪑'
+            };
+
+            // Preset 10 Levels
+            const PRESET_LEVELS = [
+                {
+                    name: "ด่าน 1: เก็บกวาดห้องนอน",
+                    targetText: "เก็บ 🧹 แล้วกลับบ้าน 🏠",
+                    start: { r: 1, c: 1 },
+                    target: { r: 1, c: 5 },
+                    items: [{ r: 1, c: 3, type: 'broom' }],
+                    obstacles: [{ r: 2, c: 3, type: 'trash' }]
+                },
+                {
+                    name: "ด่าน 2: ล้างจานในครัว",
+                    targetText: "เก็บ 🍽️ และ 🧽 แล้วกลับบ้าน 🏠",
+                    start: { r: 0, c: 0 },
+                    target: { r: 4, c: 4 },
+                    items: [
+                        { r: 0, c: 3, type: 'dish' },
+                        { r: 2, c: 3, type: 'sponge' }
+                    ],
+                    obstacles: [
+                        { r: 1, c: 1, type: 'chair' },
+                        { r: 1, c: 2, type: 'chair' },
+                        { r: 1, c: 3, type: 'chair' }
+                    ]
+                },
+                {
+                    name: "ด่าน 3: จัดห้องนั่งเล่น",
+                    targetText: "เก็บ 🧺 ให้ครบ แล้วกลับบ้าน 🏠",
+                    start: { r: 2, c: 1 },
+                    target: { r: 6, c: 5 },
+                    items: [
+                        { r: 2, c: 4, type: 'basket' },
+                        { r: 4, c: 4, type: 'basket' }
+                    ],
+                    obstacles: [
+                        { r: 3, c: 2, type: 'sofa' },
+                        { r: 3, c: 3, type: 'sofa' },
+                        { r: 3, c: 4, type: 'sofa' }
+                    ]
+                },
+                {
+                    name: "ด่าน 4: เส้นทางซิกแซก",
+                    targetText: "หลบสิ่งกีดขวางแล้วเก็บ 🧹",
+                    start: { r: 0, c: 0 },
+                    target: { r: 4, c: 0 },
+                    items: [{ r: 2, c: 2, type: 'broom' }],
+                    obstacles: [
+                        { r: 1, c: 0, type: 'trash' },
+                        { r: 1, c: 1, type: 'trash' },
+                        { r: 3, c: 1, type: 'sofa' },
+                        { r: 3, c: 2, type: 'sofa' }
+                    ]
+                },
+                {
+                    name: "ด่าน 5: ทะเลผ้าห่ม",
+                    targetText: "เก็บ 🧺 2 ชิ้น",
+                    start: { r: 7, c: 0 },
+                    target: { r: 7, c: 6 },
+                    items: [
+                        { r: 5, c: 0, type: 'basket' },
+                        { r: 5, c: 6, type: 'basket' }
+                    ],
+                    obstacles: [
+                        { r: 6, c: 2, type: 'chair' },
+                        { r: 6, c: 3, type: 'chair' },
+                        { r: 6, c: 4, type: 'chair' }
+                    ]
+                },
+                {
+                    name: "ด่าน 6: ทำความสะอาดใหญ่",
+                    targetText: "เก็บ 🧹 และ 🍽️",
+                    start: { r: 3, c: 3 },
+                    target: { r: 0, c: 6 },
+                    items: [
+                        { r: 1, c: 3, type: 'broom' },
+                        { r: 3, c: 5, type: 'dish' }
+                    ],
+                    obstacles: [
+                        { r: 2, c: 2, type: 'trash' },
+                        { r: 2, c: 4, type: 'trash' },
+                        { r: 4, c: 4, type: 'trash' }
+                    ]
+                },
+                {
+                    name: "ด่าน 7: เขาวงกตเก้าอี้",
+                    targetText: "เดินหาทางออกไปบ้าน 🏠",
+                    start: { r: 0, c: 0 },
+                    target: { r: 3, c: 3 },
+                    items: [{ r: 0, c: 6, type: 'sponge' }],
+                    obstacles: [
+                        { r: 0, c: 1, type: 'chair' },
+                        { r: 1, c: 1, type: 'chair' },
+                        { r: 2, c: 1, type: 'chair' },
+                        { r: 4, c: 3, type: 'sofa' }
+                    ]
+                },
+                {
+                    name: "ด่าน 8: ปาร์ตี้จานชาม",
+                    targetText: "เก็บ 🍽️ 3 ใบ",
+                    start: { r: 7, c: 3 },
+                    target: { r: 0, c: 3 },
+                    items: [
+                        { r: 6, c: 1, type: 'dish' },
+                        { r: 4, c: 5, type: 'dish' },
+                        { r: 2, c: 1, type: 'dish' }
+                    ],
+                    obstacles: [
+                        { r: 5, c: 3, type: 'trash' },
+                        { r: 3, c: 3, type: 'trash' }
+                    ]
+                },
+                {
+                    name: "ด่าน 9: ภารกิจเร่งด่วน",
+                    targetText: "เก็บ 🧺 และ 🧽 ให้ครบ",
+                    start: { r: 4, c: 0 },
+                    target: { r: 4, c: 6 },
+                    items: [
+                        { r: 1, c: 2, type: 'basket' },
+                        { r: 6, c: 4, type: 'sponge' }
+                    ],
+                    obstacles: [
+                        { r: 4, c: 2, type: 'sofa' },
+                        { r: 4, c: 4, type: 'sofa' }
+                    ]
+                },
+                {
+                    name: "ด่าน 10: ยอดนักทำความสะอาด",
+                    targetText: "เก็บของทั้งหมด 4 ชิ้น!",
+                    start: { r: 0, c: 0 },
+                    target: { r: 7, c: 6 },
+                    items: [
+                        { r: 0, c: 6, type: 'broom' },
+                        { r: 7, c: 0, type: 'dish' },
+                        { r: 3, c: 3, type: 'basket' },
+                        { r: 4, c: 3, type: 'sponge' }
+                    ],
+                    obstacles: [
+                        { r: 2, c: 3, type: 'trash' },
+                        { r: 5, c: 3, type: 'trash' }
+                    ]
+                }
+            ];
+
+            // ==========================================
+            // GLOBAL GAME STATE
+            // ==========================================
+            let currentMode = 1;
+            let currentLevelIndex = 0;
+            let soundEnabled = true;
+            let gameSpeed = 1; // 1x or 2x
+            let isRunning = false;
+
+            // Current Level Active State
+            let robotPos = { r: 0, c: 0 };
+            let startPos = { r: 0, c: 0 };
+            let targetPos = { r: 0, c: 0 };
+            let activeItems = [];
+            let activeObstacles = [];
+            let collectedCount = 0;
+            let totalItems = 0;
+            let commandList = [];
+
+            // Quiz Mode State
+            let quizCorrectAnswer = '';
+            let quizScore = 0;
+
+            // Editor Mode State
+            let selectedTool = 'robot';
+            let customLevelData = {
+                start: null,
+                target: null,
+                items: [],
+                obstacles: []
+            };
+
+            // ==========================================
+            // WEB AUDIO API (SOUND SYNTHESIZER)
+            // ==========================================
+            let audioCtx = null;
+
+            function initAudioContext() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
+            function playSound(type) {
+                if (!soundEnabled) return;
+                try {
+                    initAudioContext();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    const now = audioCtx.currentTime;
+
+                    if (type === 'click') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(400, now);
+                        osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                        osc.start(now);
+                        osc.stop(now + 0.05);
+                    } else if (type === 'step') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(250, now);
+                        osc.frequency.exponentialRampToValueAtTime(350, now + 0.08);
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.08);
+                        osc.start(now);
+                        osc.stop(now + 0.08);
+                    } else if (type === 'collect') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(523.25, now); // C5
+                        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                        osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                        gain.gain.setValueAtTime(0.25, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                        osc.start(now);
+                        osc.stop(now + 0.25);
+                    } else if (type === 'hit') {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(180, now);
+                        osc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
+                        gain.gain.setValueAtTime(0.3, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                        osc.start(now);
+                        osc.stop(now + 0.2);
+                    } else if (type === 'win') {
+                        const notes = [400, 500, 600, 800];
+                        notes.forEach((freq, idx) => {
+                            const o = audioCtx.createOscillator();
+                            const g = audioCtx.createGain();
+                            o.connect(g);
+                            g.connect(audioCtx.destination);
+                            o.frequency.setValueAtTime(freq, now + idx * 0.1);
+                            g.gain.setValueAtTime(0.2, now + idx * 0.1);
+                            g.gain.linearRampToValueAtTime(0, now + idx * 0.1 + 0.12);
+                            o.start(now + idx * 0.1);
+                            o.stop(now + idx * 0.1 + 0.12);
+                        });
+                    }
+                } catch (e) {
+                    console.log("Audio playback error:", e);
+                }
+            }
+
+            function toggleSound() {
+                soundEnabled = !soundEnabled;
+                const btn = document.getElementById('btn-sound');
+                if (soundEnabled) {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-high text-lg"></i>';
+                    btn.classList.replace('text-slate-400', 'text-skyDark');
+                    playSound('click');
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-xmark text-lg"></i>';
+                    btn.classList.replace('text-skyDark', 'text-slate-400');
+                }
+            }
+
+            // Global Touch/Click Listener to resume AudioContext safely
+            window.addEventListener('click', () => initAudioContext(), { once: true });
+            window.addEventListener('touchstart', () => initAudioContext(), { once: true });
+
+            // ==========================================
+            // INITIALIZATION & MODE SWITCHING
+            // ==========================================
+            window.onload = function() {
+                populateLevelDropdown();
+                loadLevel(0);
+                selectTool('robot');
+            };
+
+            function switchMode(modeNumber) {
+                playSound('click');
+                currentMode = modeNumber;
+
+                // Update tab styles
+                for (let i = 1; i <= 3; i++) {
+                    const btn = document.getElementById(`btn-mode-${i}`);
+                    if (i === modeNumber) {
+                        btn.className = "px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-mustard text-brown shadow-sm font-bold";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-xl transition flex items-center gap-1 text-slate-600 hover:text-brown";
+                    }
+                }
+
+                // Hide all mode containers
+                document.getElementById('mode-coding').classList.add('hidden');
+                document.getElementById('mode-quiz').classList.add('hidden');
+                document.getElementById('mode-editor').classList.add('hidden');
+
+                if (modeNumber === 1) {
+                    document.getElementById('mode-coding').classList.remove('hidden');
+                    renderGrid();
+                } else if (modeNumber === 2) {
+                    document.getElementById('mode-quiz').classList.remove('hidden');
+                    document.getElementById('mode-quiz').classList.add('flex');
+                    generateQuizQuestion();
+                } else if (modeNumber === 3) {
+                    document.getElementById('mode-editor').classList.remove('hidden');
+                    document.getElementById('mode-editor').classList.add('flex');
+                    renderEditorGrid();
+                }
+            }
+
+            // ==========================================
+            // MODE 1: CODING MISSION FUNCTIONS
+            // ==========================================
+            function populateLevelDropdown() {
+                const select = document.getElementById('level-select');
+                select.innerHTML = '';
+                PRESET_LEVELS.forEach((lvl, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = lvl.name;
+                    select.appendChild(opt);
+                });
+            }
+
+            function loadSelectedLevel() {
+                const idx = parseInt(document.getElementById('level-select').value);
+                playSound('click');
+                loadLevel(idx);
+            }
+
+            function loadLevel(levelIndex) {
+                currentLevelIndex = levelIndex;
+                const lvl = PRESET_LEVELS[levelIndex];
+
+                startPos = { ...lvl.start };
+                robotPos = { ...lvl.start };
+                targetPos = { ...lvl.target };
+                activeItems = JSON.parse(JSON.stringify(lvl.items));
+                activeObstacles = JSON.parse(JSON.stringify(lvl.obstacles));
+
+                collectedCount = 0;
+                totalItems = activeItems.length;
+
+                document.getElementById('mission-target-text').textContent = lvl.targetText;
+                document.getElementById('collected-count').textContent = collectedCount;
+                document.getElementById('total-items-count').textContent = totalItems;
+
+                clearCommands();
+                renderGrid();
+            }
+
+            function renderGrid() {
+                const container = document.getElementById('grid-container');
+                container.innerHTML = '';
+
+                // Outer Grid Wrapper (Labels + Cells)
+                const gridTable = document.createElement('div');
+                gridTable.className = `grid grid-cols-8 gap-1 w-full text-center font-bold text-slate-400 text-xs md:text-sm select-none`;
+
+                // Top-Left Empty Corner
+                gridTable.appendChild(createCell('', 'bg-transparent'));
+
+                // Column Headers (1-7)
+                COL_LABELS.forEach(col => {
+                    const header = createCell(col, 'flex items-center justify-center font-fredoka text-skyDark');
+                    gridTable.appendChild(header);
+                });
+
+                // Rows (A-H) and Board Content
+                for (let r = 0; r < ROWS; r++) {
+                    // Row Header (A-H)
+                    gridTable.appendChild(createCell(ROW_LABELS[r], 'flex items-center justify-center font-fredoka text-skyDark'));
+
+                    // Row Columns
+                    for (let c = 0; c < COLS; c++) {
+                        const cellId = `cell-${r}-${c}`;
+                        const cell = document.createElement('div');
+                        cell.id = cellId;
+                        cell.className = `grid-cell rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xl md:text-2xl relative shadow-inner`;
+
+                        // Render Target
+                        if (r === targetPos.r && c === targetPos.c) {
+                            cell.innerHTML = '<span class="text-2xl md:text-3xl">🏠</span>';
+                        }
+
+                        // Render Obstacles
+                        const obs = activeObstacles.find(o => o.r === r && o.c === c);
+                        if (obs) {
+                            cell.innerHTML = `<span class="text-xl md:text-2xl">${OBSTACLE_EMOJIS[obs.type] || '🗑️'}</span>`;
+                        }
+
+                        // Render Items
+                        const item = activeItems.find(i => i.r === r && i.c === c && !i.collected);
+                        if (item) {
+                            cell.innerHTML = `<span class="text-xl md:text-2xl animate-pulse">${ITEM_EMOJIS[item.type] || '🧹'}</span>`;
+                        }
+
+                        // Render Robot
+                        if (r === robotPos.r && c === robotPos.c) {
+                            const robotElem = document.createElement('div');
+                            robotElem.className = 'absolute inset-0 flex items-center justify-center text-2xl md:text-3xl z-10 robot-transition';
+                            robotElem.innerHTML = '🤖';
+                            cell.appendChild(robotElem);
+                        }
+
+                        gridTable.appendChild(cell);
+                    }
+                }
+
+                container.appendChild(gridTable);
+            }
+
+            function createCell(content, extraClasses = '') {
+                const div = document.createElement('div');
+                div.className = `grid-cell ${extraClasses}`;
+                div.innerHTML = content;
+                return div;
+            }
+
+            // Command Queue Management
+            function addCommand(dir) {
+                if (isRunning) return;
+                if (commandList.length >= 15) {
+                    showModal('⚠️ ช่องเต็มแล้ว', 'วางคำสั่งได้สูงสุด 15 คำสั่งเท่านั้นครับ');
+                    return;
+                }
+                playSound('click');
+                commandList.push(dir);
+                renderCommandSlots();
+            }
+
+            function undoCommand() {
+                if (isRunning || commandList.length === 0) return;
+                playSound('click');
+                commandList.pop();
+                renderCommandSlots();
+            }
+
+            function clearCommands() {
+                if (isRunning) return;
+                playSound('click');
+                commandList = [];
+                renderCommandSlots();
+            }
+
+            function renderCommandSlots() {
+                const slotsContainer = document.getElementById('code-slots');
+                document.getElementById('command-count').textContent = commandList.length;
+
+                if (commandList.length === 0) {
+                    slotsContainer.innerHTML = '<span id="empty-slot-msg" class="text-slate-400 text-xs text-center w-full">กดปุ่มลูกศรด้านล่างเพื่อเพิ่มคำสั่ง ⬇️</span>';
+                    return;
+                }
+
+                slotsContainer.innerHTML = '';
+                const dirMap = {
+                    'up': { icon: '⬆️', bg: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    'down': { icon: '⬇️', bg: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    'left': { icon: '⬅️', bg: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    'right': { icon: '➡️', bg: 'bg-emerald-100 text-emerald-700 border-emerald-300' }
+                };
+
+                commandList.forEach((cmd, idx) => {
+                    const slot = document.createElement('div');
+                    slot.id = `slot-${idx}`;
+                    slot.className = `flex-none px-3 py-1.5 rounded-xl border-2 font-bold text-sm flex items-center justify-center ${dirMap[cmd].bg} shadow-sm transition-all`;
+                    slot.innerHTML = `${idx + 1}. ${dirMap[cmd].icon}`;
+                    slotsContainer.appendChild(slot);
+                });
+            }
+
+            function toggleSpeed() {
+                playSound('click');
+                gameSpeed = gameSpeed === 1 ? 2 : 1;
+                document.getElementById('btn-speed').textContent = `${gameSpeed}x ⚡`;
+            }
+
+            // Run Code Execution Engine
+            async function runCode() {
+                if (isRunning || commandList.length === 0) return;
+                isRunning = true;
+                disableControls(true);
+
+                // Reset positions before running
+                robotPos = { ...startPos };
+                const lvl = currentLevelIndex >= 0 ? PRESET_LEVELS[currentLevelIndex] : customLevelData;
+                activeItems = JSON.parse(JSON.stringify(lvl.items));
+                collectedCount = 0;
+                document.getElementById('collected-count').textContent = collectedCount;
+                renderGrid();
+
+                const delay = gameSpeed === 1 ? 500 : 250;
+
+                for (let i = 0; i < commandList.length; i++) {
+                    // Highlight active slot
+                    highlightSlot(i);
+
+                    const dir = commandList[i];
+                    let nextR = robotPos.r;
+                    let nextC = robotPos.c;
+
+                    if (dir === 'up') nextR--;
+                    else if (dir === 'down') nextR++;
+                    else if (dir === 'left') nextC--;
+                    else if (dir === 'right') nextC++;
+
+                    // Check Grid Boundaries Collision
+                    if (nextR < 0 || nextR >= ROWS || nextC < 0 || nextC >= COLS) {
+                        playSound('hit');
+                        showModal('💥 ชนขอบตาราง!', 'หุ่นยนต์เดินออกนอกกระดาน ลองปรับทิศทางใหม่นะครับ');
+                        resetAfterFailure();
+                        return;
+                    }
+
+                    // Check Obstacle Collision
+                    const hitObs = activeObstacles.find(o => o.r === nextR && o.c === nextC);
+                    if (hitObs) {
+                        playSound('hit');
+                        showModal('💥 ชนสิ่งกีดขวาง!', `หุ่นยนต์เดินชน ${OBSTACLE_EMOJIS[hitObs.type]} ลองวางคำสั่งใหม่นะ`);
+                        resetAfterFailure();
+                        return;
+                    }
+
+                    // Move Robot
+                    robotPos = { r: nextR, c: nextC };
+                    playSound('step');
+
+                    // Check Item Pick Up
+                    const itemIdx = activeItems.findIndex(item => item.r === robotPos.r && item.c === robotPos.c && !item.collected);
+                    if (itemIdx !== -1) {
+                        activeItems[itemIdx].collected = true;
+                        collectedCount++;
+                        document.getElementById('collected-count').textContent = collectedCount;
+                        playSound('collect');
+                    }
+
+                    renderGrid();
+                    await new Promise(r => setTimeout(r, delay));
+                }
+
+                // Un-highlight slots
+                highlightSlot(-1);
+
+                // Check Victory Conditions
+                const allItemsCollected = collectedCount === totalItems;
+                const reachedTarget = robotPos.r === targetPos.r && robotPos.c === targetPos.c;
+
+                if (allItemsCollected && reachedTarget) {
+                    playSound('win');
+                    triggerConfetti();
+                    showModal('🎉 เก่งมากเด็กๆ!', 'ช่วยเหลืองานบ้านสำเร็จและกลับบ้านได้อย่างปลอดภัย!');
+                } else if (!allItemsCollected && reachedTarget) {
+                    playSound('hit');
+                    showModal('🧹 ยังเก็บงานบ้านไม่หมด!', 'อย่าลืมเดินเก็บไอเทมงานบ้านให้ครบทุกชิ้นก่อนกลับบ้านนะ');
+                } else {
+                    playSound('hit');
+                    showModal('🏠 ยังไปไม่ถึงบ้าน!', 'หุ่นยนต์ยังเดินไปไม่ถึงบ้านเป้าหมาย ลองเพิ่มคำสั่งอีกนิดนะ');
+                }
+
+                disableControls(false);
+                isRunning = false;
+            }
+
+            function highlightSlot(index) {
+                commandList.forEach((_, idx) => {
+                    const slot = document.getElementById(`slot-${idx}`);
+                    if (slot) {
+                        if (idx === index) {
+                            slot.classList.add('ring-4', 'ring-mustard', 'scale-110');
+                        } else {
+                            slot.classList.remove('ring-4', 'ring-mustard', 'scale-110');
+                        }
+                    }
+                });
+            }
+
+            function resetAfterFailure() {
+                highlightSlot(-1);
+                disableControls(false);
+                isRunning = false;
+            }
+
+            function resetMission() {
+                playSound('click');
+                if (currentLevelIndex >= 0) {
+                    loadLevel(currentLevelIndex);
+                } else {
+                    // Custom level reset
+                    robotPos = { ...startPos };
+                    activeItems = JSON.parse(JSON.stringify(customLevelData.items));
+                    collectedCount = 0;
+                    document.getElementById('collected-count').textContent = 0;
+                    renderGrid();
+                }
+            }
+
+            function disableControls(disabled) {
+                document.getElementById('btn-run-code').disabled = disabled;
+                document.getElementById('btn-reset-code').disabled = disabled;
+            }
+
+            // ==========================================
+            // MODE 2: COORDINATE QUIZ FUNCTIONS
+            // ==========================================
+            function generateQuizQuestion() {
+                const quizGrid = document.getElementById('quiz-grid-container');
+                quizGrid.innerHTML = '';
+                document.getElementById('quiz-feedback').textContent = '';
+
+                // Random target position
+                const randomR = Math.floor(Math.random() * ROWS);
+                const randomC = Math.floor(Math.random() * COLS);
+                quizCorrectAnswer = `${ROW_LABELS[randomR]}${COL_LABELS[randomC]}`;
+
+                // Render Simple Quiz Grid
+                const gridTable = document.createElement('div');
+                gridTable.className = `grid grid-cols-8 gap-1 w-full text-center font-bold text-slate-400 text-xs md:text-sm select-none`;
+
+                gridTable.appendChild(createCell('', 'bg-transparent'));
+                COL_LABELS.forEach(col => gridTable.appendChild(createCell(col, 'flex items-center justify-center font-fredoka text-skyDark')));
+
+                for (let r = 0; r < ROWS; r++) {
+                    gridTable.appendChild(createCell(ROW_LABELS[r], 'flex items-center justify-center font-fredoka text-skyDark'));
+                    for (let c = 0; c < COLS; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = `grid-cell rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xl shadow-inner`;
+                        if (r === randomR && c === randomC) {
+                            cell.innerHTML = '🧹';
+                            cell.classList.add('bg-yellow-100', 'ring-2', 'ring-mustard');
+                        }
+                        gridTable.appendChild(cell);
+                    }
+                }
+                quizGrid.appendChild(gridTable);
+
+                // Update Question Text
+                document.getElementById('quiz-question').innerHTML = `ไม้กวาด 🧹 อยู่ที่พิกัดช่องใด?`;
+
+                // Generate Options (1 Correct, 3 Wrong)
+                const options = new Set([quizCorrectAnswer]);
+                while (options.size < 4) {
+                    const r = Math.floor(Math.random() * ROWS);
+                    const c = Math.floor(Math.random() * COLS);
+                    options.add(`${ROW_LABELS[r]}${COL_LABELS[c]}`);
+                }
+
+                const shuffleOptions = Array.from(options).sort(() => Math.random() - 0.5);
+                const optionsContainer = document.getElementById('quiz-options');
+                optionsContainer.innerHTML = '';
+
+                shuffleOptions.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = `bg-slate-100 border-2 border-slate-300 hover:bg-sky/30 text-brown font-bold text-lg py-3 rounded-2xl shadow transition active:scale-95 font-fredoka`;
+                    btn.textContent = opt;
+                    btn.onclick = () => checkQuizAnswer(opt, btn);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+
+            function checkQuizAnswer(selectedOpt, btnElement) {
+                const feedback = document.getElementById('quiz-feedback');
+                if (selectedOpt === quizCorrectAnswer) {
+                    playSound('win');
+                    triggerConfetti();
+                    quizScore += 10;
+                    document.getElementById('quiz-score').textContent = quizScore;
+                    feedback.className = "text-center font-bold min-h-[28px] text-sm text-emerald-600";
+                    feedback.textContent = "✨ถูกต้องแล้วครับ! เก่งมากๆ ✨";
+                    setTimeout(() => generateQuizQuestion(), 1500);
+                } else {
+                    playSound('hit');
+                    feedback.className = "text-center font-bold min-h-[28px] text-sm text-rose-500";
+                    feedback.textContent = "❌ ยังไม่ถูกนะครับ ลองดูป้ายกำกับแถวและคอลัมน์อีกทีนะ";
+                }
+            }
+
+            // ==========================================
+            // MODE 3: CUSTOM LEVEL EDITOR FUNCTIONS
+            // ==========================================
+            function selectTool(toolName) {
+                playSound('click');
+                selectedTool = toolName;
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.classList.remove('border-emerald-500', 'bg-emerald-50');
+                });
+                const activeBtn = document.getElementById(`tool-${toolName}`);
+                if (activeBtn) {
+                    activeBtn.classList.add('border-emerald-500', 'bg-emerald-50');
+                }
+            }
+
+            function renderEditorGrid() {
+                const container = document.getElementById('editor-grid-container');
+                container.innerHTML = '';
+
+                const gridTable = document.createElement('div');
+                gridTable.className = `grid grid-cols-8 gap-1 w-full text-center font-bold text-slate-400 text-xs md:text-sm select-none`;
+
+                gridTable.appendChild(createCell('', 'bg-transparent'));
+                COL_LABELS.forEach(col => gridTable.appendChild(createCell(col, 'flex items-center justify-center font-fredoka text-skyDark')));
+
+                for (let r = 0; r < ROWS; r++) {
+                    gridTable.appendChild(createCell(ROW_LABELS[r], 'flex items-center justify-center font-fredoka text-skyDark'));
+                    for (let c = 0; c < COLS; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = `grid-cell rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xl shadow-inner cursor-pointer hover:bg-emerald-50 transition`;
+                        cell.onclick = () => handleEditorCellClick(r, c);
+
+                        // Render Editor Elements
+                        if (customLevelData.start && customLevelData.start.r === r && customLevelData.start.c === c) {
+                            cell.innerHTML = '🤖';
+                        } else if (customLevelData.target && customLevelData.target.r === r && customLevelData.target.c === c) {
+                            cell.innerHTML = '🏠';
+                        } else {
+                            const item = customLevelData.items.find(i => i.r === r && i.c === c);
+                            if (item) {
+                                cell.innerHTML = ITEM_EMOJIS[item.type] || '🧹';
+                            } else {
+                                const obs = customLevelData.obstacles.find(o => o.r === r && o.c === c);
+                                if (obs) {
+                                    cell.innerHTML = OBSTACLE_EMOJIS[obs.type] || '🗑️';
+                                }
+                            }
+                        }
+
+                        gridTable.appendChild(cell);
+                    }
+                }
+                container.appendChild(gridTable);
+            }
+
+            function handleEditorCellClick(r, c) {
+                playSound('click');
+
+                // Clear existing item at position
+                customLevelData.items = customLevelData.items.filter(i => !(i.r === r && i.c === c));
+                customLevelData.obstacles = customLevelData.obstacles.filter(o => !(o.r === r && o.c === c));
+                if (customLevelData.start && customLevelData.start.r === r && customLevelData.start.c === c) customLevelData.start = null;
+                if (customLevelData.target && customLevelData.target.r === r && customLevelData.target.c === c) customLevelData.target = null;
+
+                // Apply Selected Tool
+                if (selectedTool === 'robot') {
+                    customLevelData.start = { r, c };
+                } else if (selectedTool === 'target') {
+                    customLevelData.target = { r, c };
+                } else if (selectedTool === 'item1') {
+                    customLevelData.items.push({ r, c, type: 'broom' });
+                } else if (selectedTool === 'item2') {
+                    customLevelData.items.push({ r, c, type: 'basket' });
+                } else if (selectedTool === 'obstacle') {
+                    customLevelData.obstacles.push({ r, c, type: 'trash' });
+                }
+
+                renderEditorGrid();
+            }
+
+            function clearEditorGrid() {
+                playSound('click');
+                customLevelData = { start: null, target: null, items: [], obstacles: [] };
+                renderEditorGrid();
+            }
+
+            function playCustomLevel() {
+                if (!customLevelData.start) {
+                    showModal('⚠️ ยังไม่ได้วางหุ่นยนต์', 'กรุณาวาง 🤖 หุ่นยนต์ อย่างน้อย 1 ตัวบนกระดานก่อนครับ');
+                    return;
+                }
+                if (!customLevelData.target) {
+                    showModal('⚠️ ยังไม่ได้วางบ้าน', 'กรุณาวาง 🏠 บ้านเส้นชัย อย่างน้อย 1 หลังบนกระดานก่อนครับ');
+                    return;
+                }
+
+                // Prepare Custom Level for Coding Mode
+                currentLevelIndex = -1; // -1 means custom level
+                startPos = { ...customLevelData.start };
+                robotPos = { ...customLevelData.start };
+                targetPos = { ...customLevelData.target };
+                activeItems = JSON.parse(JSON.stringify(customLevelData.items));
+                activeObstacles = JSON.parse(JSON.stringify(customLevelData.obstacles));
+                collectedCount = 0;
+                totalItems = activeItems.length;
+
+                document.getElementById('mission-target-text').textContent = "ด่านสร้างเอง: ทำภารกิจให้สำเร็จ!";
+                document.getElementById('collected-count').textContent = 0;
+                document.getElementById('total-items-count').textContent = totalItems;
+
+                switchMode(1);
+            }
+
+            // ==========================================
+            // MODAL & CELEBRATION EFFECTS
+            // ==========================================
+            function showModal(title, message) {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-message').textContent = message;
+                document.getElementById('modal').classList.remove('hidden');
+            }
+
+            function closeModal() {
+                playSound('click');
+                document.getElementById('modal').classList.add('hidden');
+            }
+
+            function triggerConfetti() {
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error("Critical Application Error:", error);
+        }
+    </script>
+</body>
+</html>
